@@ -47,7 +47,7 @@ class Hand(HandMatrix):
     def check_flush(self):
         suit_counts = np.matmul(self.hand_matrix, np.ones(13))
         max_suit = suit_counts.max()
-        if max_suit < 4:
+        if max_suit <= 4:
             return False, None
         straight_check = np.array([1 if x == max_suit else 0 for x in suit_counts])
         projection = np.row_stack((np.matmul(np.transpose(self.hand_matrix),straight_check),np.zeros(shape=(3,13))))
@@ -193,8 +193,11 @@ if __name__ == '__main__':
     full_house = [Card('Spades',1), Card('Diamonds',1), Card('Hearts',1), Card('Diamonds',6), Card('Spades',3), Card('Spades',6), Card('Clubs',6)]
     three_of_a_kind = [Card('Spades',1), Card('Diamonds',1), Card('Hearts',4), Card('Diamonds',6), Card('Spades',3), Card('Spades',6), Card('Clubs',6)]
     flush_three_of_a_kind = [Card('Spades',13), Card('Spades',2), Card('Spades',4), Card('Diamonds',6), Card('Spades',3), Card('Spades',6), Card('Clubs',6)]
+    four_of_a_kind = [Card('Spades', 13), Card('Spades', 2), Card('Hearts', 6), Card('Diamonds', 6),
+                             Card('Spades', 3), Card('Spades', 6), Card('Clubs', 6)]
 
     test_hand(full_house, 'full house')
     test_hand(three_of_a_kind,'three of a kind')
     test_hand(flush_three_of_a_kind, 'flush')
+    test_hand(four_of_a_kind, '4 of a kind')
 
