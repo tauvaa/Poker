@@ -149,11 +149,9 @@ def full_game():
         if g.player1.bank<0:
             print("player 2 won")
             return 'player2'
-            break
         elif g.player2.bank<0:
             print("player 1 won")
             return 'player1'
-            break
         
         g = play_game(g,f)
     

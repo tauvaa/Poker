@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 from tkinter import *
-from PIL import Image
-#from Source.game import card
+# from PIL import Image
+# from Source.game import card
 
 def add_hand(parent,card1,card2,offset=2):
         """
@@ -64,7 +64,7 @@ class card_frame(Frame):
             picture = PhotoImage(file='test.gif')
         
         #picture.grid(row=1,colum=3)
-        print(type(picture))
+        # print(type(picture))
         #photo = PhotoImage(picture)
         lab_photo=Label(parent,image=picture)
         lab_photo.image=picture
@@ -112,7 +112,7 @@ def main():
     #temp.mainloop()
     #c= card()
     #c.add_labels()
-#main()
+# main()
 
         
         

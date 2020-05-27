@@ -89,7 +89,7 @@ class player:
         self.player_name = playerName
         self.card1 = None
         self.card2 = None
-    def lose_cards():
+    def lose_cards(self):
         self.card1=None
         self.card2=None
     def show_cards(self):
@@ -130,7 +130,7 @@ class game:
         
         
         
-    def switch_dealer():
+    def switch_dealer(self):
         if self.dealer==1:
             self.dealer=0
         else:
@@ -147,10 +147,7 @@ class game:
         self.player2.card2=None
         self.CommunityCards = []
         
-        
-        
-        
-    
+
     def start_game(self):
         """method used to start a game.  Will shuffle the game
         deck and deal cards."""
@@ -196,7 +193,7 @@ class game:
                 v =[]
                 for c in cards:
                     v.append(c.value)
-                v.sort
+                v.sort()
                 if v[0]==1:
                     v.append(14)
                 streak=0
@@ -400,8 +397,6 @@ class game:
                     return Draw_ret
             else:
                 return Draw_ret
-        print("player 1 "+player1_hand)
-        print("player 2 "+player2_hand)
 
 
 def play_game(g=game(),master=None):
@@ -442,8 +437,9 @@ def play_game(g=game(),master=None):
     #FLOP
     if x[0] == 'call':
         print("==============Flop==================")
+        g.game_pot = x[1]
         print("the game pot is: ",g.game_pot)
-        g.game_pot+=x[1]
+
         g.flop()
         #if g.is_training:
         elements = []
@@ -591,11 +587,15 @@ def play_game(g=game(),master=None):
                 
             
         if x == Player1_Victory_ret:
+            print(f'Player 1 bank: {g.player1.bank}')
+            print(f'Player 2 bank: {g.player1.bank}')
             g.player1.bank+=g.game_pot
             #f.write('player1\n')
             if g.is_training:
                 t.Outcome = 0 #will use 0 to indicate a loss
         elif x==Player2_Victory_ret:
+            print(f'Player 1 bank: {g.player1.bank}')
+            print(f'Player 2 bank: {g.player1.bank}')
             g.player2.bank+=g.game_pot
             #f.write('player2\n')
             if g.is_training:

@@ -11,7 +11,7 @@ def read_player_input(b):
     
         #B1 = tk.Button(popupBonusWindow, text="Okay", command=popupBonusWindow.destroy)
         #B1.grid(row=1,column=0)
-    popupBonusWindow.mainloop()
+    # popupBonusWindow.mainloop()
     #print(d)
     #to_ret = x.mainloop()
     #return d
@@ -109,9 +109,11 @@ class betting:
     
     def decide(self):
         """function which decideds which method to call"""
+        print(f'player 1 bank: {self.player1.bank}')
+        print(f'player 1 bank: {self.player2.bank}')
         if self.to==1:
             self.player1.show_cards()
-            #decision=read_player_input(self)
+            # decision=read_player_input(self)
             x = self.popup()
             x.mainloop()
             decision = self.decision
@@ -163,13 +165,14 @@ class betting:
         
     def bet(self,ammount):
         print("========BET==========")
-        self.pot+=ammount+self.to_call
+        bet_amount = ammount + self.to_call
+        self.pot+= bet_amount
         print("with that bet the pot is at: ", self.pot)
         self.to_call = ammount
         if self.to==1:
-            self.player1.bank -= ammount
+            self.player1.bank -= bet_amount
         else:
-            self.player2.bank-=ammount
+            self.player2.bank -= bet_amount
         self.switch_player()
         print(self.to,' to')
         self.previous_decision='b'
