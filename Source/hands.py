@@ -46,7 +46,7 @@ class Hand(HandMatrix):
 
     def check_flush(self):
         suit_counts = np.matmul(self.hand_matrix, np.ones(13))
-        max_suit = suit_counts.max()
+        max_suit = np.max(suit_counts)
         if max_suit <= 4:
             return False, None
         straight_check = np.array([1 if x == max_suit else 0 for x in suit_counts])
@@ -85,7 +85,7 @@ class Hand(HandMatrix):
         # 4 of a kind
         # =========================================================================================
         if compress.max() == 4:
-            return True, {'type':'4 of a kind', 'hc': np.argmax(compress)}
+            return True, {'type':'four of a kind', 'hc': np.argmax(compress)}
 
         # =========================================================================================
         # full house
@@ -156,6 +156,7 @@ class Hand(HandMatrix):
             for i,x in enumerate(np.flipud(compress)):
                 if x>0:
                     return True, len(compress) - i - 1
+
     def check_hand(self):
 
         # Flush Checker
