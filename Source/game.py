@@ -50,7 +50,10 @@ class Betting:
             if 'amount' not in decision:
                 return self.fold()
             else:
-                return self.bet(decision['amount'])
+                amount = decision['amount']
+                if amount > min(self.game.player1.bank, self.game.player2.bank):
+                    amount = min(self.game.player1.bank, self.game.player2.bank)
+                return self.bet(amount)
         elif decision['choice'] == 'call':
             return self.call()
         else:
@@ -380,9 +383,9 @@ def play(game=None):
         game = Game(player1, player2)
     while True:
         if game.player1.bank <=0:
-            return 'player 1 loses'
+            return game.player2.player_name
         if game.player2.bank <= 0:
-            return 'player 2 loses'
+            return game.player1.player_name
 
         game.play_hand()
 

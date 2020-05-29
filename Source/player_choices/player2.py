@@ -26,6 +26,6 @@ def player2choice(gamestate):
     options = gamestate['betting_info']['betting_options']
     choice = {'choice':random.choice(options)}
     if choice['choice'] == 'bet':
-        choice['amount']=10
+        choice['amount']=25
     # print(f"player 2 bank: {gamestate['player_info']['bank']}")
     return choice
