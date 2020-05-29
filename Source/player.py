@@ -21,8 +21,8 @@ class Player(Hand):
         self.bank += amount
 
     def get_player_state(self):
-        player_state = dict(cards=[x.card_string() for x in self.cards],
-                            hand_matrix=self.hand_matrix,
+        player_state = dict(hand=dict(cards=[x.card_string() for x in self.cards],
+                            hand_matrix=self.hand_matrix),
                             bank=self.bank
                             )
         return player_state.copy()

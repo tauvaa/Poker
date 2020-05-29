@@ -48,7 +48,9 @@ class HandMatrix:
         row = Deck.suits.index(card.suit)
         column = card.value - 1
         self.hand_matrix[row, column] += 1
-
+    def reset_hand(self):
+        self.hand_matrix = np.zeros(shape=(4,13))
+        self.cards = []
     def get_hand_matrix(self):
         return self.hand_matrix
 
@@ -107,7 +109,7 @@ class Hand(HandMatrix):
         # print(mask)
         elif (compress.max() == 3 and compress[[True if x != compress.max() and i != 0 else False for i,x in enumerate(compress)]].max() == 2) or (len(compress[compress==3])>1):
             mask = [True if x != compress.max() and i != 0 else False for i,x in enumerate(compress)]
-            print(compress[mask])
+            # print(compress[mask])
             to_ret = {'type': 'full house'}
             hc = {}
             if compress[0] > 1:
@@ -142,14 +144,15 @@ class Hand(HandMatrix):
         # two pair
         # =========================================================================================
         elif len(compress[compress==2])>1:
-            to_ret = {'type': '2 of a kind'}
+            to_ret = {'type': 'two pair'}
             hc ={}
             if compress[0] > 1:
                 hc['top_pair'] = 0
-            for i, x in enumerate(compress):
+            for i, x in enumerate(np.flipud(compress)):
                 if x == 2:
-                    if 'top_pair' in to_ret:
+                    if 'top_pair' in hc:
                         hc['bottom_pair'] = len(compress) - i - 1
+                        to_ret['info'] = hc
                         return True, to_ret
                     else:
                         hc['top_pair'] = len(compress) - i - 1
@@ -159,6 +162,7 @@ class Hand(HandMatrix):
         # =========================================================================================
         elif compress.max() == 2:
             return True ,{'type': 'pair', 'hc': np.argmax(compress)}
+        return False, None
 
     def check_high_card(self,to_check=None):
         if to_check is None: to_check = self.hand_matrix
@@ -178,19 +182,25 @@ class Hand(HandMatrix):
             hand = hc['type']
             high_card = hc['high card']
             # if high_card == 0: high_card = 13
-            return {'hand':hand, 'high_card': high_card}
+            self.hand_info = {'hand':hand, 'high_card': high_card}
+            return self.hand_info
         # straight
+        # you can't have anything in pairs that beats a straight and a straight... so checking in this order is fine...
+        # I think?
         check, hc = self.check_straight()
         if check:
             # if hc == 0: hc = 13
-            return {'hand':'straight', "high_card":hc}
+            self.hand_info = {'hand':'straight', "high_card":hc}
+            return self.hand_info
         # pairs
         check, hc = self.check_pairs()
         if check:
-            return {'hand':hc['type'], 'info':hc}
+            self.hand_info = {'hand':hc['type'], 'info':hc}
+            return self.hand_info
         # high card
         check, hc = self.check_high_card()
-        return {'hand': 'high card', 'high_card': hc}
+        self.hand_info = {'hand': 'high card', 'high_card': hc}
+        return self.hand_info
 
 
 def test_hand(hand, expected=None):
@@ -201,7 +211,7 @@ def test_hand(hand, expected=None):
     print(f'actual: {x}')
     print(f'expected: {expected}')
 
-
+ # King of Hearts | 10 of Diamonds | 7 of Clubs | Jack of Diamonds | 7 of Hearts | 10 of Spades | 2 of Spades
 if __name__ == '__main__':
 
     full_house = [Card('Spades',1), Card('Diamonds',1), Card('Hearts',1), Card('Diamonds',6), Card('Spades',3), Card('Spades',6), Card('Clubs',6)]
@@ -209,9 +219,11 @@ if __name__ == '__main__':
     flush_three_of_a_kind = [Card('Spades',13), Card('Spades',2), Card('Spades',4), Card('Diamonds',6), Card('Spades',3), Card('Spades',6), Card('Clubs',6)]
     four_of_a_kind = [Card('Spades', 13), Card('Spades', 2), Card('Hearts', 6), Card('Diamonds', 6),
                              Card('Spades', 3), Card('Spades', 6), Card('Clubs', 6)]
-
+    two_pair = [Card("Hearts", 13), Card("Diamonds", 10), Card("Clubs", 7), Card("Diamonds", 11), Card("Hearts", 7),
+              Card("Spades", 10), Card("Spades", 2)]
     test_hand(full_house, 'full house')
     test_hand(three_of_a_kind,'three of a kind')
     test_hand(flush_three_of_a_kind, 'flush')
     test_hand(four_of_a_kind, '4 of a kind')
+    test_hand(pair_7, "two pair")
 
