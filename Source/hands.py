@@ -20,9 +20,20 @@ class Card:
 class Deck:
     suits = 'Hearts Diamonds Spades Clubs'.split()
     values = range(13)
-    cards = [Card(suit, value) for suit in suits for value in range(1, 14)]
+    def __init__(self):
+        # self.suits = 'Hearts Diamonds Spades Clubs'.split()
+        # self.values = range(13)
+        self.cards = [Card(suit, value) for suit in self.suits for value in range(1, 14)]
+
     def deal_card(self):
         return self.cards.pop()
+
+    def shuffle(self):
+        new_deck = []
+        while len(self.cards)>0:
+            new_deck.append(self.cards.pop(np.random.choice(range(0,len(self.cards)))))
+        # assert len(new_deck) == 52
+        self.cards = new_deck
 
     def __getitem__(self, item):
         return self.cards[item]
@@ -31,7 +42,9 @@ class Deck:
 class HandMatrix:
     def __init__(self):
         self.hand_matrix = np.zeros(shape=(4,13))
+        self.cards = []
     def add_card(self, card):
+        self.cards.append(card)
         row = Deck.suits.index(card.suit)
         column = card.value - 1
         self.hand_matrix[row, column] += 1
