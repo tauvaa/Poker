@@ -13,6 +13,7 @@ def player2choice(gamestate):
     return dictionary with {'choice': your choice, 'amount':bet amount}
     amount is only required when choice=bet
     """
+    # print(gamestate)
     player_info = gamestate['player_info']
     betting_info = gamestate['betting_info']
     for state in 'hand flop turn river'.split():
@@ -24,6 +25,7 @@ def player2choice(gamestate):
     # time.sleep(.1)
     options = gamestate['betting_info']['betting_options']
     choice = {'choice':random.choice(options)}
-    if choice == 'bet':
-        choice['amount']=100
-    return {'choice':'check'}
+    if choice['choice'] == 'bet':
+        choice['amount']=10
+    # print(f"player 2 bank: {gamestate['player_info']['bank']}")
+    return choice

@@ -5,7 +5,7 @@ class Card:
         self.suit = suit
         self.value = value
     def card_string(self):
-        if self.value == 1:
+        if self.value == 14:
             cval = "Ace"
         elif self.value == 11:
             cval = "Jack"
@@ -19,11 +19,11 @@ class Card:
 
 class Deck:
     suits = 'Hearts Diamonds Spades Clubs'.split()
-    values = range(13)
+    values = range(2, 15)
     def __init__(self):
         # self.suits = 'Hearts Diamonds Spades Clubs'.split()
         # self.values = range(13)
-        self.cards = [Card(suit, value) for suit in self.suits for value in range(1, 14)]
+        self.cards = [Card(suit, value) for suit in self.suits for value in self.values]
 
     def deal_card(self):
         return self.cards.pop()
@@ -46,7 +46,7 @@ class HandMatrix:
     def add_card(self, card):
         self.cards.append(card)
         row = Deck.suits.index(card.suit)
-        column = card.value - 1
+        column = card.value - 2
         self.hand_matrix[row, column] += 1
     def reset_hand(self):
         self.hand_matrix = np.zeros(shape=(4,13))
@@ -100,7 +100,7 @@ class Hand(HandMatrix):
         # 4 of a kind
         # =========================================================================================
         if compress.max() == 4:
-            return True, {'type':'four of a kind', 'hc': np.argmax(compress)}
+            return True, {'type':'four of a kind', 'hc': np.argmax(compress) + 2}
 
         # =========================================================================================
         # full house
@@ -112,25 +112,25 @@ class Hand(HandMatrix):
             # print(compress[mask])
             to_ret = {'type': 'full house'}
             hc = {}
-            if compress[0] > 1:
-                if compress[0] == 3:
-                    hc['triples'] = 0
-                elif compress[0] == 2:
-                    hc['pair'] = 0
+            # if compress[0] > 1:
+            #     if compress[0] == 3:
+            #         hc['triples'] = 0
+            #     elif compress[0] == 2:
+            #         hc['pair'] = 0
 
             if compress.max() == 3 and compress[mask].max() == 2:
                 for i, x in enumerate(np.flipud(compress)):
                     if x == 3:
-                       hc['triples'] = len(compress) - i - 1
+                       hc['triples'] = len(compress) - i - 1 + 2
                     elif x == 2:
-                        hc['pair'] = len(compress) - i - 1
+                        hc['pair'] = len(compress) - i - 1 + 2
             else:
                 for i, x in enumerate(np.flipud(compress)):
                     if x == 3:
                         if 'triples' not in hc:
-                            hc['triples'] = len(compress) - i - 1
+                            hc['triples'] = len(compress) - i - 1 + 2
                         else:
-                            hc['pair'] = len(compress) - i - 1
+                            hc['pair'] = len(compress) - i - 1 + 2
                             break
             to_ret['hc'] = hc
             return True, to_ret
@@ -139,40 +139,41 @@ class Hand(HandMatrix):
         # three of a kind
         # =========================================================================================
         elif compress.max() == 3:
-            return True, {'type':'three of a kind', 'hc':np.argmax(compress)}
+            return True, {'type':'three of a kind', 'hc':np.argmax(compress) + 2}
         # =========================================================================================
         # two pair
         # =========================================================================================
         elif len(compress[compress==2])>1:
             to_ret = {'type': 'two pair'}
             hc ={}
-            if compress[0] > 1:
-                hc['top_pair'] = 0
+            # if compress[0] > 1:
+            #     hc['top_pair'] = 0
             for i, x in enumerate(np.flipud(compress)):
                 if x == 2:
                     if 'top_pair' in hc:
-                        hc['bottom_pair'] = len(compress) - i - 1
+                        hc['bottom_pair'] = len(compress) - i - 1 + 2
                         to_ret['info'] = hc
                         return True, to_ret
                     else:
-                        hc['top_pair'] = len(compress) - i - 1
+                        hc['top_pair'] = len(compress) - i - 1 + 2
 
         # =========================================================================================
         # Pair
         # =========================================================================================
         elif compress.max() == 2:
-            return True ,{'type': 'pair', 'hc': np.argmax(compress)}
+            return True ,{'type': 'pair', 'hc': np.argmax(compress) + 2}
         return False, None
 
     def check_high_card(self,to_check=None):
         if to_check is None: to_check = self.hand_matrix
         compress = np.matmul(np.transpose(np.ones(4)),to_check)
-        if compress[0] > 0:
-            return True, 0
-        else:
-            for i,x in enumerate(np.flipud(compress)):
-                if x>0:
-                    return True, len(compress) - i - 1
+        # if compress[0] > 0:
+        #     return True, 0
+
+        # else:
+        for i,x in enumerate(np.flipud(compress)):
+            if x>0:
+                return True, len(compress) - i - 1 + 2
 
     def check_hand(self):
 

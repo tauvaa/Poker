@@ -18,7 +18,7 @@ class Betting:
         self.is_player1_betting = not self.is_player1_betting
 
     def get_betting_info(self):
-        betting_options = ['fold', 'call', 'raise']
+        betting_options = ['fold', 'call', 'bet']
         if self.previous_choice is None or self.previous_choice == 'check':
             betting_options.append('check')
         betting_info = dict(
@@ -62,6 +62,12 @@ class Betting:
 
 
     def check(self):
+        if self.is_player1_betting:
+            if self.game.player1.to_print:
+                print(f'{self.game.player1.player_name}: checked')
+        else:
+            if self.game.player2.to_print:
+                print(f'{self.game.player2.player_name}: checked')
         if self.previous_choice == 'check':
             return False
         else:
@@ -72,8 +78,12 @@ class Betting:
     def call(self):
         if self.is_player1_betting:
             self.game.update_pot(self.to_call, self.game.player1)
+            if self.game.player1.to_print and self.to_call > 0 :
+                print(f'{self.game.player1.player_name}: called {self.to_call}')
         else:
             self.game.update_pot(self.to_call, self.game.player2)
+            if self.game.player2.to_print and self.to_call > 0 :
+                print(f'{self.game.player2.player_name}: called {self.to_call}')
         if self.to_call == 0:
             return self.check()
         else:
@@ -82,8 +92,12 @@ class Betting:
     def bet(self, amount):
         if self.is_player1_betting:
             self.game.update_pot(amount=amount, player=self.game.player1)
+            if self.game.player1.to_print:
+                print(f'{self.game.player1.player_name}: bet {amount}')
         else:
             self.game.update_pot(amount=amount, player=self.game.player2)
+            if self.game.player2.to_print:
+                print(f'{self.game.player2.player_name}: bet {amount}')
         self.to_call = amount
         self.previous_choice = 'bet'
         self.switch_bidder()
@@ -92,23 +106,45 @@ class Betting:
 
     def fold(self):
         if self.is_player1_betting:
+            if self.game.player1.to_print:
+                print(f'{self.game.player1.player_name}: folds')
             self.game.update_pot(-1*self.game.pot, self.game.player2)
+
         else:
+            if self.game.player2.to_print:
+                print(f'{self.game.player2.player_name}: folds')
             self.game.update_pot(-1*self.game.pot, self.game.player1)
+
         return True
 
-class Flop(HandMatrix):
+class GameStates(HandMatrix):
+    def __init__(self, state_name=None, to_print=True):
+        super(GameStates, self).__init__()
+        self.state_name = state_name
+        self.to_print = to_print
+    def print_state(self):
+        if self.to_print:
+            if self.state_name is not None:
+                wrapper = ''.join(['=' for _ in range(10)])
+                print(wrapper + wrapper + wrapper)
+                print(f'{wrapper} {self.state_name} {wrapper}')
+                print(wrapper + wrapper + wrapper)
+            splt_ch = ' | '
+            print(splt_ch.join([x.card_string() for x in self.cards]))
+
+
+class Flop(GameStates):
     def __init__(self):
         super(Flop, self).__init__()
-
-class Turn(HandMatrix):
+        self.state_name = 'Flop'
+class Turn(GameStates):
     def __init__(self):
         super(Turn, self).__init__()
-
-class River(HandMatrix):
+        self.state_name = 'Turn'
+class River(GameStates):
     def __init__(self):
         super(River, self).__init__()
-
+        self.state_name = 'River'
 
 class Game:
     def __init__(self, player1, player2):
@@ -136,13 +172,16 @@ class Game:
         return {'flop': flop,
                 'turn': turn,
                 'river': river,
-                'pot': self.pot}
+                'pot': self.pot
+                ,'state': self.state}
     def get_player_info(self, player):
         player_info = {**self.get_game_info().copy(), **player.get_player_state()}
         return player_info
-
+    def print_player_pots(self):
+        print(f"player 1 bank: {self.player1.bank}")
+        print(f'player 2 bank: {self.player2.bank}')
     def new_hand(self):
-
+        self.print_player_pots()
         self.player1.reset_hand()
         self.player2.reset_hand()
         self.switch_dealer()
@@ -164,6 +203,8 @@ class Game:
     def update_pot(self, amount, player):
         self.pot += amount
         player.bank -= amount
+        if amount < 0:
+            print(f'moved: {-1*amount} to {player.player_name}')
 
     def get_blinds(self):
         if self.player1.is_dealer:
@@ -193,6 +234,9 @@ class Game:
             for _ in range(2):
                 self.player1.add_card(self.deck.deal_card())
                 self.player2.add_card(self.deck.deal_card())
+        for x in (self.player1, self.player2):
+            if x.to_print:
+                print(f'{x.player_name}: {x.print_hand()}')
 
     def switch_state(self):
         possible_states = ['preflop', 'flop', 'turn', 'river', 'show_cards']
@@ -295,12 +339,15 @@ class Game:
         is_fold = self.bet()
         if not is_fold:
             self._flop()
+            self.flop.print_state()
             is_fold = self.bet()
         if not is_fold:
             self._turn()
+            self.turn.print_state()
             self.bet()
         if not is_fold:
             self._river()
+            self.river.print_state()
             is_fold = self.bet()
         if not is_fold:
             # add the community cards to the players hands
