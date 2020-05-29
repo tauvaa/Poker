@@ -225,5 +225,5 @@ if __name__ == '__main__':
     test_hand(three_of_a_kind,'three of a kind')
     test_hand(flush_three_of_a_kind, 'flush')
     test_hand(four_of_a_kind, '4 of a kind')
-    test_hand(pair_7, "two pair")
+    test_hand(two_pair, "two pair")
 

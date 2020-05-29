@@ -343,4 +343,4 @@ def play(game=None):
 
 if __name__ == '__main__':
     x = play()
-    print(x)
+    # print(x)
