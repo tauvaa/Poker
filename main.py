@@ -15,4 +15,4 @@ if __name__ == '__main__':
         print(winner)
         counter[winner] += 1
     print(counter)
-    print(f'player 1 won {100*counter["player 1"]/(counter["player 1"]+counter["player 2"])}')
+    print(f'player 1 won {100*counter["player 1"]/(counter["player 1"]+counter["player 2"])}%')

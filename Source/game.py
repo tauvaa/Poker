@@ -13,8 +13,10 @@ class Betting:
         self.is_player1_betting = (not game.player1.is_dealer)
         self.previous_choice = None
         self.to_call = 0
+        self.betting_options = None
 
     def switch_bidder(self):
+        self.game.print_player_pots()
         self.is_player1_betting = not self.is_player1_betting
 
     def get_betting_info(self):
@@ -22,10 +24,14 @@ class Betting:
         if self.to_call > 0:
             betting_options.append('call')
         if self.game.player1.bank > 0 and self.game.player2.bank >0:
-            betting_options.append('bet')
+            if self.is_player1_betting and self.game.player1.bank > self.to_call:
+                betting_options.append('bet')
+            elif not self.is_player1_betting and self.game.player2.bank > self.to_call:
+                betting_options.append('bet')
         if self.previous_choice is None or self.previous_choice == 'check':
             betting_options.append('check')
         print(betting_options)
+        self.betting_options = betting_options
         betting_info = dict(
             previous_previous_choice=self.previous_choice,
             to_call=self.to_call,
@@ -44,6 +50,8 @@ class Betting:
         return decision
     def choice(self):
         decision = self.ask_player()
+        if decision['choice'] not in self.betting_options:
+            return self.fold()
 
         if decision['choice'] == 'check':
             if self.previous_choice == 'check' or self.previous_choice is None:
@@ -81,7 +89,7 @@ class Betting:
         else:
             if self.game.player2.to_print:
                 print(f'{self.game.player2.player_name}: checked')
-        if self.previous_choice == 'check' or self.to_call == 0:
+        if self.previous_choice == 'check':
             return False
         else:
             self.previous_choice = 'check'

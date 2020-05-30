@@ -23,8 +23,10 @@ def player2choice(gamestate):
     if np.max(colapse) > 1 and 'bet' in gamestate['betting_info']['betting_options']:
         print(gamestate['betting_info']['betting_options'])
         return {'choice': 'bet', 'amount': 100}
-    else: return {'choice': 'call'}
-    betting_info = gamestate['betting_info']
+    else:
+        if 'call' in gamestate['betting_info']['betting_options']:
+            return {'choice': 'call'}
+    # else: return {'choice': 'call'}
 
     # print(player_info)
     # print(player_info['bank'])
