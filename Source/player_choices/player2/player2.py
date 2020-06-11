@@ -1,7 +1,9 @@
 #!/user/bin/env python3
 import random
 import time
+import numpy as np
 def player2choice(gamestate):
+
     """Play put the algorithm in here.  Input will be the gamestate formated
         {
         player_info:{}
@@ -13,13 +15,19 @@ def player2choice(gamestate):
     return dictionary with {'choice': your choice, 'amount':bet amount}
     amount is only required when choice=bet
     """
+
     # print(gamestate)
     player_info = gamestate['player_info']
-    betting_info = gamestate['betting_info']
-    for state in 'hand flop turn river'.split():
-        x = player_info[state]['cards']
-        if len(x) > 0:
-            pass #print(f'state: {state}, cards: {x}')
+    hand_matrix = player_info['hand']['hand_matrix']
+    colapse = np.matmul(np.transpose(hand_matrix), np.ones(4))
+    if np.max(colapse) > 1 and 'bet' in gamestate['betting_info']['betting_options']:
+        print(gamestate['betting_info']['betting_options'])
+        return {'choice': 'bet', 'amount': 100}
+    else:
+        if 'call' in gamestate['betting_info']['betting_options']:
+            return {'choice': 'call'}
+    # else: return {'choice': 'call'}
+
     # print(player_info)
     # print(player_info['bank'])
     # time.sleep(.1)
