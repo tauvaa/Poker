@@ -1,4 +1,4 @@
 # Poker
-## Author: Tololima Auva'a, tololima.auvaa@gmail.com
+## contact: Tololima Auva'a, tololima.auvaa@gmail.com
 
 
