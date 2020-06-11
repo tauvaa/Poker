@@ -152,9 +152,9 @@ class GameStates(HandMatrix):
         if self.to_print:
             if self.state_name is not None:
                 wrapper = ''.join(['=' for _ in range(10)])
-                print(wrapper + wrapper + wrapper)
+                print(3*wrapper)
                 print(f'{wrapper} {self.state_name} {wrapper}')
-                print(wrapper + wrapper + wrapper)
+                print(3*wrapper)
             splt_ch = ' | '
             print(splt_ch.join([x.card_string() for x in self.cards]))
 
