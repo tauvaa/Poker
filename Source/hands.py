@@ -65,6 +65,7 @@ class Hand(HandMatrix):
         if max_suit <= 4:
             return False, None
         straight_check = np.array([1 if x == max_suit else 0 for x in suit_counts])
+        # projection used to get only flush cards
         projection = np.row_stack((np.matmul(np.transpose(self.hand_matrix),straight_check),np.zeros(shape=(3,13))))
         is_straight, hc = self.check_straight(projection)
         if is_straight:

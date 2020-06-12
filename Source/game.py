@@ -78,7 +78,7 @@ class Betting:
             return self.fold()
 
     def gamble(self):
-        self.game.switch_state()
+        # self.game.switch_state()
         return self.choice()
 
 
@@ -204,9 +204,11 @@ class Game:
     def get_player_info(self, player):
         player_info = {**self.get_game_info().copy(), **player.get_player_state()}
         return player_info
+
     def print_player_pots(self):
         print(f"player 1 bank: {self.player1.bank}")
         print(f'player 2 bank: {self.player2.bank}')
+
     def new_hand(self):
         if self.winner is not None and self.winner.player_name == 'player 2':
             with open('p2w.txt', 'a+') as f:
@@ -385,19 +387,28 @@ class Game:
         self.new_hand()
         self._start_hand()
         is_fold = self.bet()
+        # =========================== FLOP ===========================
         if not is_fold:
+            self.switch_state()
             self._flop()
             self.flop.print_state()
             is_fold = self.bet()
+        # =========================== TURN ===========================
         if not is_fold:
+            self.switch_state()
             self._turn()
+            print("TURN!!!!!!!!")
             self.turn.print_state()
-            self.bet()
+            is_fold = self.bet()
+        # =========================== RIVER ===========================
         if not is_fold:
+            self.switch_state()
             self._river()
             self.river.print_state()
             is_fold = self.bet()
+        # =========================== SHOWDOWN ===========================
         if not is_fold:
+            self.switch_state()
             # add the community cards to the players hands
 
             for list_cards in (self.flop.cards, self.turn.cards, self.river.cards):

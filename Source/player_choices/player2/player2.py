@@ -15,7 +15,12 @@ def player2choice(gamestate):
     return dictionary with {'choice': your choice, 'amount':bet amount}
     amount is only required when choice=bet
     """
-
+    if gamestate['player_info']['state'] == 'turn':
+        print(gamestate['player_info'])
+        assert len(gamestate['player_info']['turn']['cards']) == 1
+        assert len(gamestate['player_info']['river']['cards']) == 0
+        assert len(gamestate['player_info']['flop']['cards']) == 3
+        # return {'choice': 'fold'}
     # print(gamestate)
     player_info = gamestate['player_info']
     hand_matrix = player_info['hand']['hand_matrix']
