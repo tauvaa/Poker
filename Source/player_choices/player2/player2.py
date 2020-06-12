@@ -20,8 +20,7 @@ def player2choice(gamestate):
         assert len(gamestate['player_info']['turn']['cards']) == 1
         assert len(gamestate['player_info']['river']['cards']) == 0
         assert len(gamestate['player_info']['flop']['cards']) == 3
-        # return {'choice': 'fold'}
-    # print(gamestate)
+
     player_info = gamestate['player_info']
     hand_matrix = player_info['hand']['hand_matrix']
     colapse = np.matmul(np.transpose(hand_matrix), np.ones(4))
@@ -31,14 +30,8 @@ def player2choice(gamestate):
     else:
         if 'call' in gamestate['betting_info']['betting_options']:
             return {'choice': 'call'}
-    # else: return {'choice': 'call'}
-
-    # print(player_info)
-    # print(player_info['bank'])
-    # time.sleep(.1)
     options = gamestate['betting_info']['betting_options']
     choice = {'choice':random.choice(options)}
     if choice['choice'] == 'bet':
         choice['amount']=25
-    # print(f"player 2 bank: {gamestate['player_info']['bank']}")
     return choice
