@@ -2,6 +2,13 @@
 import random
 import time
 import numpy as np
+import json
+from os.path import dirname, join
+def player2_handle_outcome(game_info):
+    with open(join(dirname(__file__),'games_played'), 'a+') as f:
+        f.write(json.dumps(game_info))
+        f.write(f"\n {''.join(['=' for _ in range(100)])}\n")
+
 def player2choice(gamestate):
 
     """Play put the algorithm in here.  Input will be the gamestate formated

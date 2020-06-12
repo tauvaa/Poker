@@ -2,8 +2,8 @@
 from Source.hands import HandMatrix, Deck
 from Source.player import Player
 from config import starting_big_blind, starting_small_blind
-from Source.player_choices.player1.player1 import player1choice
-from Source.player_choices.player2.player2 import player2choice
+from Source.player_choices.player1.player1 import player1choice, player1_handle_outcome
+from Source.player_choices.player2.player2 import player2choice, player2_handle_outcome
 
 class Betting:
     """used to update game... probably better if this extended game"""
@@ -13,6 +13,9 @@ class Betting:
         self.is_player1_betting = (not game.player1.is_dealer)
         self.previous_choice = None
         self.to_call = 0
+        if self.game.state =='preflop':
+            self.to_call = self.game.big_blind - self.game.small_blind
+
         self.betting_options = None
 
     def switch_bidder(self):
@@ -188,6 +191,7 @@ class Game:
         self.state = None
         self.player1_betting = None
         self.winner = None
+        self.pot_total = 0
 
     def get_game_info(self):
         flop_cards = [x.card_string() for x in self.flop.cards]
@@ -232,19 +236,22 @@ class Game:
         self.flop = Flop()
         self.turn = Turn()
         self.river = River()
-        self.player1_betting = (not self.player1.is_dealer)
+        self.player1_betting = self.player1.is_dealer
 
     def switch_dealer(self):
-        self.player1.is_dealer = not self.player1.is_dealer
-        self.player2.is_dealer = not self.player2.is_dealer
+        self.player1.switch_dealer()
+        self.player2.switch_dealer()
 
     def update_pot(self, amount, player):
+        if amount < 0:
+            self.pot_total = self.pot
+            print(f'moved: {-1*amount} to {player.player_name}')
         self.pot += amount
         player.bank -= amount
-        if amount < 0:
-            print(f'moved: {-1*amount} to {player.player_name}')
+
 
     def get_blinds(self):
+        # self.pre_bet_action = self.big_blind - self.small_blind
         if self.player1.is_dealer:
             if self.player1.bank < self.small_blind:
                 self.update_pot(self.player1.bank, self.player1)
@@ -313,26 +320,27 @@ class Game:
             self.player2.add_card(card)
             self.player1.add_card(card)
 
+    def draw(self):
+        # print(self.player1_info)
+        if self.player1_info['hand'] =='high card':
+            if self.player1_info['high_card']>self.player2_info['high_card']:
+                return self.player1
+            elif self.player1_info['high_card']<self.player2_info['high_card']:
+                return self.player2
+
+        elif self.player1_info['hand'] == 'pair':
+            if self.player1_info['info']['hc'] > self.player2_info['info']['hc']:
+                return self.player1
+            elif self.player1_info['info']['hc'] < self.player2_info['info']['hc']:
+                return self.player2
+
+        return Player('draw')
+
     def showdown(self):
         """see who won"""
         # ====================================================================================
         #                               DRAW IS HERE!!!!!!
         # ====================================================================================
-        def draw():
-            # print(self.player1_info)
-            if self.player1_info['hand'] =='high card':
-                if self.player1_info['high_card']>self.player2_info['high_card']:
-                    return 'player1'
-                elif self.player1_info['high_card']<self.player2_info['high_card']:
-                    return 'player2'
-
-            elif self.player1_info['hand'] == 'pair':
-                if self.player1_info['info']['hc'] > self.player2_info['info']['hc']:
-                    return 'player1'
-                elif self.player1_info['info']['hc'] < self.player2_info['info']['hc']:
-                    return 'player2'
-
-            return 'draw'
 
         ranking = [
             'straight flush'
@@ -363,11 +371,12 @@ class Game:
         self.player2_info = player2_info
         # self.print_board()
         if ranking.index(player1_info['hand']) < ranking.index(player2_info['hand']):
-            return self.player1
+            self.winner = self.player1
         elif ranking.index(player1_info['hand']) > ranking.index(player2_info['hand']):
-            return self.player2
+            self.winner = self.player2
         else:
-            return draw()
+            self.winner = self.draw()
+
     def print_board(self):
         sep_char = ' | '
         flop_string = sep_char.join([x.card_string() for x in self.flop.cards])
@@ -381,7 +390,31 @@ class Game:
         print(player1_string)
         print(player2_string)
 
+    def end_game(self, is_fold):
+        """used to get the end of game info, tells winner, win type (fold/not show_cards) and opponnent cards
+        if found here.  This gets passed to the player handle outcome functions"""
+        if self.player1.is_dealer:
+            dealer = self.player1.player_name
+        elif self.player2.is_dealer:
+            dealer = self.player2.player_name
+        base_game_info = {
+            'winner': self.winner.player_name,
+            'is_fold': is_fold,
+            'player_1_bank': self.player1.bank,
+            'player_2_bank': self.player2.bank,
+            'pot_size': self.pot_total,
+            'blinds':{'small_blind':self.small_blind, 'big_blind':self.big_blind},
+            'dealer': dealer
 
+        }
+        self.pot_total = 0
+        if is_fold or True: # change this to add more info for non fold games
+            player1_handle_outcome(game_info=base_game_info.copy())
+            player2_handle_outcome(game_info=base_game_info.copy())
+
+    # ================================================================================================================
+    # ==========================================   HAND STUFF  =======================================================
+    # ================================================================================================================
     def play_hand(self):
         print(''.join(['+' for _ in range(10)]+['new game'] + ['+' for _ in range(10)]))
         self.new_hand()
@@ -390,6 +423,7 @@ class Game:
         # =========================== FLOP ===========================
         if not is_fold:
             self.switch_state()
+            self.player1_betting = not self.player1_betting  # after opening betting switch so dealer doesn't bet first
             self._flop()
             self.flop.print_state()
             is_fold = self.bet()
@@ -397,7 +431,6 @@ class Game:
         if not is_fold:
             self.switch_state()
             self._turn()
-            print("TURN!!!!!!!!")
             self.turn.print_state()
             is_fold = self.bet()
         # =========================== RIVER ===========================
@@ -410,33 +443,22 @@ class Game:
         if not is_fold:
             self.switch_state()
             # add the community cards to the players hands
-
             for list_cards in (self.flop.cards, self.turn.cards, self.river.cards):
                 self.showdown_add_cards(list_cards)
-            winner = self.showdown()
-            if type(winner) != str:
-                self.update_pot(-1*self.pot, winner)
+            self.showdown()
+            if self.winner.player_name != 'draw':
+                self.update_pot(-1*self.pot, self.winner)
             else:
                 draw_pot = self.pot
                 self.update_pot(-1 * draw_pot / 2, self.player1)
                 self.update_pot(-1 * draw_pot / 2, self.player2)
 
-            # if winner == 'player1':
-            #     self.update_pot(-1*self.pot, self.player1)
-            # elif winner == 'player2':
-            #     self.update_pot(-1*self.pot, self.player2)
-            # elif winner == 'draw':
-            #
 
             print(f'player 1: {self.player1_info}')
             print(f'player 2: {self.player2_info}')
             self.print_board()
+        self.end_game(is_fold)
 
-    def _print_game_state(self):
-        # SEEMS USELESS
-        game_state = {'player_1_state':self.player1.get_player_state(),
-                      'player_2_state':self.player2.get_player_state()}
-        print(game_state)
 
 def play(game=None):
     if game is None:
