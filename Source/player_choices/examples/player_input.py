@@ -13,7 +13,7 @@ def get_state_cards(cards):
     if len(cards) == 0:
         return ''
     return ' | '.join(cards)
-def player2choice(gamestate):
+def playin_with_yourself(gamestate, player=''):
 
     """Play put the algorithm in here.  Input will be the gamestate formated
         {
@@ -27,7 +27,7 @@ def player2choice(gamestate):
     amount is only required when choice=bet
     """
     space = ''.join(['\n' for _ in range(5)])
-    print(f"{10 * space}DECISION PLAYER 2")
+    print(f"{10 * space}DECISION {player}")
     player_info = gamestate['player_info']
     betting_info = gamestate['betting_info']
     flop = player_info['flop']

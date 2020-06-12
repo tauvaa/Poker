@@ -10,11 +10,15 @@ class Betting:
 
     def __init__(self, game):
         self.game = game
-        self.is_player1_betting = (not game.player1.is_dealer)
+        self.is_player1_betting =  game.player1_betting
         self.previous_choice = None
-        self.to_call = 0
+
         if self.game.state =='preflop':
             self.to_call = self.game.big_blind - self.game.small_blind
+            self.first_call = True
+        else:
+            self.first_call = False
+            self.to_call = 0
 
         self.betting_options = None
 
@@ -31,16 +35,19 @@ class Betting:
                 betting_options.append('bet')
             elif not self.is_player1_betting and self.game.player2.bank > self.to_call:
                 betting_options.append('bet')
-        if self.previous_choice is None or self.previous_choice == 'check':
+        if self.previous_choice == 'check' or self.previous_choice == 'call' or (self.previous_choice is None and not self.first_call):
             betting_options.append('check')
-        print(betting_options)
+        # print(betting_options)
         self.betting_options = betting_options
+
         betting_info = dict(
-            previous_previous_choice=self.previous_choice,
+            previous_choice=self.previous_choice,
             to_call=self.to_call,
-            betting_options=betting_options
+            betting_options=betting_options,
+            player_banks={x[0]: x[1] for x in [[player.player_name,player.bank] for player in (self.game.player1, self.game.player2)]}
         )
         return betting_info
+
     def ask_player(self):
         info = {'betting_info': self.get_betting_info()}
         if self.is_player1_betting:
@@ -51,14 +58,18 @@ class Betting:
             info['player_info'] = self.game.get_player_info(self.game.player2)
             decision = player2choice(info)
         return decision
+
     def choice(self):
+
         decision = self.ask_player()
+
         if decision['choice'] not in self.betting_options:
             return self.fold()
-
         if decision['choice'] == 'check':
             if self.previous_choice == 'check' or self.previous_choice is None:
                 return self.check()
+            if self.previous_choice == 'call':
+                return False
             else:
                 # you couldn't check in that situation
                 return self.fold()
@@ -110,10 +121,18 @@ class Betting:
                 print(f'{self.game.player2.player_name}: called {self.to_call}')
         if self.to_call == 0:
             return self.check()
+        elif self.first_call:
+            self.to_call = 0
+            self.previous_choice = 'call'
+            self.first_call = False
+            self.switch_bidder()
+            return self.choice()
         else:
             return False
 
     def bet(self, amount):
+        if self.first_call:
+            self.first_call = False
         if amount < 0:
             self.game.print_player_pots()
             raise ValueError
