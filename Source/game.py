@@ -243,9 +243,9 @@ class Game:
         self.player2.reset_hand()
         self.switch_dealer()
         self.game_count += 1
-        if self.game_count % 50 == 0:
-            self.small_blind = 3*self.small_blind
-            self.big_blind = 3*self.big_blind
+        if self.game_count % 500 == 0:
+            self.small_blind = 2*self.small_blind
+            self.big_blind = 2*self.big_blind
             print(self.big_blind, self.small_blind)
         self.deck = Deck() # re-initalize deck
         self.deck.shuffle()
@@ -458,14 +458,23 @@ class Game:
             'player_2_bank': self.player2.bank,
             'pot_size': self.pot_total,
             'blinds':{'small_blind':self.small_blind, 'big_blind':self.big_blind},
-            'dealer': dealer
-
+            'dealer': dealer,
+            'community_cards': {state: {'hand_matrix':obj.get_hand_matrix(), 'cards':obj.cards.copy()} for obj, state in zip((self.flop, self.turn, self.river), ('flop', 'turn', 'river'))}
         }
+
         self.pot_total = 0
-        if is_fold or True: # change this to add more info for non fold games
+        player_cards = [{player.player_name: {'hand_matrix': player.get_hand_matrix(), 'cards': player.cards.copy()}}
+                        for player in (self.player1, self.player2)]
+        player_1_cards = player_cards[0].copy()
+        player_2_cards = player_cards[1].copy()
+        if is_fold: # change this to add more info for non fold games
+            player1_handle_outcome(game_info={**base_game_info.copy(),**{'player_cards':player_1_cards}})
+            player2_handle_outcome(game_info={**base_game_info.copy(),**{'player_cards':player_2_cards}})
+        else:
+
+            base_game_info['player_cards'] = player_cards.copy()
             player1_handle_outcome(game_info=base_game_info.copy())
             player2_handle_outcome(game_info=base_game_info.copy())
-
     # ================================================================================================================
     # ==========================================   HAND STUFF  =======================================================
     # ================================================================================================================

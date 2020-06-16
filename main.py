@@ -5,7 +5,7 @@ from Source.game import play
 def main():
     play()
 if __name__ == '__main__':
-    number_games = 1
+    number_games = 20
     if len(sys.argv) > 1:
         number_games = int(sys.argv[1])
 
