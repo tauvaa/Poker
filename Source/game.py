@@ -368,12 +368,17 @@ class Game:
                 return self.player1
             elif self.player1_info['info']['hc'] < self.player2_info['info']['hc']:
                 return self.player2
+
         elif self.player1_info['hand'] == 'straight':
             if self.player1_info['high_card'] > self.player2_info['high_card']:
                 return self.player1
             elif self.player1_info['high_card'] < self.player2_info['high_card']:
                 return self.player2
-
+        elif self.player1_info['hand'] == 'regular flush':
+            if self.player1_info['high_card'] > self.player2_info['high_card']:
+                return self.player1
+            elif self.player1_info['high_card'] < self.player2_info['high_card']:
+                return self.player2
         elif self.player1_info['hand'] == 'full house':
             if self.player1_info['info']['hc']['triples'] > self.player2_info['info']['hc']['triples']:
                 return self.player1
