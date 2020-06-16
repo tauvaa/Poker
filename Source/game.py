@@ -353,6 +353,36 @@ class Game:
             elif self.player1_info['info']['hc'] < self.player2_info['info']['hc']:
                 return self.player2
 
+        elif self.player1_info['hand'] == 'two pair':
+            if self.player1_info['info']['info']['top_pair'] > self.player2_info['info']['info']['top_pair']:
+                return self.player1
+            elif self.player1_info['info']['info']['top_pair'] < self.player2_info['info']['info']['top_pair']:
+                return self.player2
+            elif self.player1_info['info']['info']['bottom_pair'] > self.player2_info['info']['info']['bottom_pair']:
+                return self.player1
+            elif self.player1_info['info']['info']['bottom_pair'] < self.player2_info['info']['info']['bottom_pair']:
+                return self.player2
+
+        elif self.player1_info['hand'] == 'three of a kind':
+            if self.player1_info['info']['hc'] > self.player2_info['info']['hc']:
+                return self.player1
+            elif self.player1_info['info']['hc'] < self.player2_info['info']['hc']:
+                return self.player2
+        elif self.player1_info['hand'] == 'straight':
+            if self.player1_info['high_card'] > self.player2_info['high_card']:
+                return self.player1
+            elif self.player1_info['high_card'] < self.player2_info['high_card']:
+                return self.player2
+
+        elif self.player1_info['hand'] == 'full house':
+            if self.player1_info['info']['hc']['triples'] > self.player2_info['info']['hc']['triples']:
+                return self.player1
+            elif self.player1_info['info']['hc']['triples'] < self.player2_info['info']['hc']['triples']:
+                return self.player2
+            elif self.player1_info['info']['hc']['pair'] > self.player2_info['info']['hc']['pair']:
+                return self.player1
+            elif self.player1_info['info']['hc']['triples'] < self.player2_info['info']['hc']['triples']:
+                return self.player2
         return Player('draw')
 
     def showdown(self):

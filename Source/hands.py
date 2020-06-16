@@ -121,9 +121,9 @@ class Hand(HandMatrix):
 
             if compress.max() == 3 and compress[mask].max() == 2:
                 for i, x in enumerate(np.flipud(compress)):
-                    if x == 3:
+                    if x == 3 and 'triples' not in hc:
                        hc['triples'] = len(compress) - i - 1 + 2
-                    elif x == 2:
+                    elif x == 2 and 'pair' not in hc:
                         hc['pair'] = len(compress) - i - 1 + 2
             else:
                 for i, x in enumerate(np.flipud(compress)):
@@ -217,6 +217,8 @@ def test_hand(hand, expected=None):
 if __name__ == '__main__':
 
     full_house = [Card('Spades',1), Card('Diamonds',1), Card('Hearts',1), Card('Diamonds',6), Card('Spades',3), Card('Spades',6), Card('Clubs',6)]
+    full_house1 = [Card('Spades', 2), Card('Diamonds', 2), Card('Hearts', 2), Card('Diamonds', 3), Card('Spades', 3),
+                  Card('Spades', 6), Card('Clubs', 6)]
     three_of_a_kind = [Card('Spades',1), Card('Diamonds',1), Card('Hearts',4), Card('Diamonds',6), Card('Spades',3), Card('Spades',6), Card('Clubs',6)]
     flush_three_of_a_kind = [Card('Spades',13), Card('Spades',2), Card('Spades',4), Card('Diamonds',6), Card('Spades',3), Card('Spades',6), Card('Clubs',6)]
     four_of_a_kind = [Card('Spades', 13), Card('Spades', 2), Card('Hearts', 6), Card('Diamonds', 6),
@@ -228,4 +230,5 @@ if __name__ == '__main__':
     test_hand(flush_three_of_a_kind, 'flush')
     test_hand(four_of_a_kind, '4 of a kind')
     test_hand(two_pair, "two pair")
+    test_hand(full_house1)
 
