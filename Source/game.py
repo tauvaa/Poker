@@ -45,7 +45,7 @@ class Betting:
             to_call=self.to_call,
             betting_options=betting_options,
             player_banks={x[0]: x[1] for x in [[player.player_name,player.bank] for player in (self.game.player1, self.game.player2)]}
-            # ,min_bet=self.game.big_blind
+            ,min_bet=self.game.big_blind
         )
         return betting_info
 
@@ -77,8 +77,8 @@ class Betting:
         elif decision['choice'] == 'bet':
             if 'amount' not in decision:
                 return self.fold()
-            # if decision['amount'] < self.game.big_blind:
-            #     return self.fold()
+            if decision['amount'] < self.game.big_blind:
+                return self.fold()
             else:
                 if self.is_player1_betting:
                     self.game.update_pot(self.to_call, self.game.player1)
