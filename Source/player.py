@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 from Source.hands import Hand, HandMatrix, Deck
-from config import starting_big_blind, starting_small_blind
+from config import starting_big_blind, starting_small_blind, starting_bank
 
 
 class Player(Hand):
-    def __init__(self, player_name, bank=1000, to_print=True):
+    def __init__(self, player_name, bank=starting_bank, to_print=True):
         super(Player, self).__init__()
         self.player_name = player_name
         self.bank = bank

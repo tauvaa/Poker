@@ -5,7 +5,7 @@ import json
 from os.path import join, dirname
 from Source.player_choices.examples.player_input import playin_with_yourself, random_choice, check_pairs, check_through
 def player1_handle_outcome(game_info):
-    print(game_info)
+    # print(game_info)
     com_cards = game_info['community_cards']
     player_cards = game_info['player_cards']
     del game_info['player_cards']
@@ -18,4 +18,5 @@ def player1_handle_outcome(game_info):
 
 
 def player1choice(gamestate):
-    return check_through(gamestate)
+    print(gamestate['betting_info']['min_bet'])
+    return random_choice(gamestate)

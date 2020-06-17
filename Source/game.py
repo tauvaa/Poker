@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from Source.hands import HandMatrix, Deck
 from Source.player import Player
-from config import starting_big_blind, starting_small_blind
+from config import starting_big_blind, starting_small_blind, starting_bank
 from Source.player_choices.player1.player1 import player1choice, player1_handle_outcome
 from Source.player_choices.player2.player2 import player2choice, player2_handle_outcome
 
@@ -44,7 +44,8 @@ class Betting:
             previous_choice=self.previous_choice,
             to_call=self.to_call,
             betting_options=betting_options,
-            player_banks={x[0]: x[1] for x in [[player.player_name,player.bank] for player in (self.game.player1, self.game.player2)]}
+            player_banks={x[0]: x[1] for x in [[player.player_name,player.bank] for player in (self.game.player1, self.game.player2)]},
+            min_bet=self.game.big_blind
         )
         return betting_info
 
@@ -75,6 +76,8 @@ class Betting:
                 return self.fold()
         elif decision['choice'] == 'bet':
             if 'amount' not in decision:
+                return self.fold()
+            if decision['amount'] < self.game.big_blind:
                 return self.fold()
             else:
                 if self.is_player1_betting:
@@ -239,7 +242,7 @@ class Game:
         self.player2.reset_hand()
         self.switch_dealer()
         self.game_count += 1
-        if self.game_count % 500 == 0:
+        if self.game_count % 100 == 0 and 2*self.big_blind<starting_bank:
             self.small_blind = 2*self.small_blind
             self.big_blind = 2*self.big_blind
             print(self.big_blind, self.small_blind)

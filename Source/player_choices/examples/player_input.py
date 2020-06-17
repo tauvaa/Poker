@@ -62,9 +62,8 @@ def random_choice(gamestate, player=''):
     setup(gamestate, player)
     betting_options = gamestate['betting_info']['betting_options']
     option = random.choice(betting_options)
-    with open('player_options', 'a+') as f:
-        f.write(f'{option}\n')
-    print(f'{option}!!!!!!!!!!!!!!!!!!!!!!')
+    # with open('player_options', 'a+') as f:
+    #     f.write(f'{option}\n')
     if option == 'bet':
         return {'choice':option,'amount':25}
     if option == 'call':
