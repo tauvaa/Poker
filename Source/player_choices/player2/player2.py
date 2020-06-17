@@ -4,7 +4,7 @@ import time
 import numpy as np
 import json
 from os.path import dirname, join
-from Source.player_choices.examples.player_input import random_choice
+from Source.player_choices.examples.player_input import random_choice, check_through
 def player2_handle_outcome(game_info):
     with open(join(dirname(__file__),'games_played'), 'a+') as f:
         com_cards = game_info['community_cards']
@@ -33,4 +33,4 @@ def player2choice(gamestate):
     return dictionary with {'choice': your choice, 'amount':bet amount}
     amount is only required when choice=bet
     """
-    return random_choice(gamestate, 'player_2')
+    return check_through(gamestate)

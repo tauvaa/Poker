@@ -80,6 +80,9 @@ class Hand(HandMatrix):
         is_straight = False
         count = 0
         straight_checker = np.matmul(np.transpose(np.ones(4)),to_check)
+        if straight_checker[-1] > 0:
+            count += 1
+
         for i in range(len(straight_checker)+1):
             ind = i%len(straight_checker)
             if straight_checker[ind] > 0:
@@ -88,10 +91,12 @@ class Hand(HandMatrix):
                     is_straight = True
             else:
                 if is_straight:
-                    return True, (ind - 1) %13
+
+                    return True, (ind - 1) %13 +2
                 else:
                     count = 0
-        return is_straight, ind
+
+        return is_straight, ind + 2
 
     def check_pairs(self, to_check=None):
         if to_check is None: to_check = self.hand_matrix
@@ -225,10 +230,13 @@ if __name__ == '__main__':
                              Card('Spades', 3), Card('Spades', 6), Card('Clubs', 6)]
     two_pair = [Card("Hearts", 13), Card("Diamonds", 10), Card("Clubs", 7), Card("Diamonds", 11), Card("Hearts", 7),
               Card("Spades", 10), Card("Spades", 2)]
+    straight = [Card("Hearts", 2), Card("Diamonds", 3), Card("Clubs", 4), Card("Diamonds", 5), Card("Hearts", 7),
+              Card("Spades", 9), Card("Spades", 14)]
     test_hand(full_house, 'full house')
     test_hand(three_of_a_kind,'three of a kind')
     test_hand(flush_three_of_a_kind, 'flush')
     test_hand(four_of_a_kind, '4 of a kind')
     test_hand(two_pair, "two pair")
-    test_hand(full_house1)
+    test_hand(full_house1, 'full house')
+    test_hand(straight, 'straight')
 

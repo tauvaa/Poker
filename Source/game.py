@@ -233,10 +233,6 @@ class Game:
         print(f'player 2 bank: {self.player2.bank}')
 
     def new_hand(self):
-        if self.winner is not None and self.winner.player_name == 'player 2':
-            with open('p2w.txt', 'a+') as f:
-                f.write('player2\n')
-
         self.winner = None
         self.print_player_pots()
         self.player1.reset_hand()

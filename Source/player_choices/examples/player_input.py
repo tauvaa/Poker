@@ -99,3 +99,8 @@ def playin_with_yourself(gamestate, player=''):
             to_ret.append(50)
         return {'choice': to_ret[0], 'amount': int(to_ret[1])}
     return {'choice': to_ret}
+
+def check_through(gamestate):
+    if 'check' not in gamestate['betting_info']['betting_options']:
+        return {'choice': 'call'}
+    return {'choice': 'check'}
