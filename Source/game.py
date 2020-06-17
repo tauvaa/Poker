@@ -54,10 +54,10 @@ class Betting:
         if self.is_player1_betting:
             info['player_info'] = self.game.get_player_info(self.game.player1)
             decision = player1choice(info)
-
         else:
             info['player_info'] = self.game.get_player_info(self.game.player2)
             decision = player2choice(info)
+        info['player_info']['bets'].append(decision)
         return decision
 
     def choice(self):
@@ -240,6 +240,8 @@ class Game:
         self.print_player_pots()
         self.player1.reset_hand()
         self.player2.reset_hand()
+        self.player1.reset_bets()
+        self.player2.reset_bets()
         self.switch_dealer()
         self.game_count += 1
         if self.game_count % 100 == 0 and 2*self.big_blind<starting_bank:
@@ -453,8 +455,10 @@ class Game:
         base_game_info = {
             'winner': self.winner.player_name,
             'is_fold': is_fold,
+            'player_1_bets': self.player1.bets,
             'player_1_bank': self.player1.bank,
             'player_2_bank': self.player2.bank,
+            'player_2_bets': self.player2.bets,
             'pot_size': self.pot_total,
             'blinds':{'small_blind':self.small_blind, 'big_blind':self.big_blind},
             'dealer': dealer,

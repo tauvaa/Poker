@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import sys
 from Source.game import play
+import Source.player_choices.player1.training as t
+
+def train():
+    t.train_model()
 
 def main():
-    play()
-if __name__ == '__main__':
     number_games = 1
     if len(sys.argv) > 1:
         number_games = int(sys.argv[1])
@@ -16,3 +18,8 @@ if __name__ == '__main__':
         counter[winner] += 1
     print(counter)
     print(f'player 1 won {100*counter["player 1"]/(counter["player 1"]+counter["player 2"])}%')
+
+if __name__ == '__main__':
+    train()
+
+   

@@ -11,6 +11,10 @@ class Player(Hand):
         self.bank = bank
         self.is_dealer = False
         self.to_print = to_print
+        self.bets = []
+    
+    def reset_bets(self):
+        self.bets = []
 
     def switch_dealer(self):
         self.is_dealer = not self.is_dealer
@@ -29,7 +33,8 @@ class Player(Hand):
     def get_player_state(self):
         player_state = dict(hand=dict(cards=[x.card_string() for x in self.cards],
                             hand_matrix=self.hand_matrix.copy()),
-                            bank=self.bank
+                            bank=self.bank,
+                            bets=self.bets
                             )
         return player_state.copy()
 

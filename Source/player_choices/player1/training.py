@@ -13,8 +13,9 @@ def train_model():
         with open(to_ap, 'rb') as f:
             all_data.append(pickle.load(f))
     for k in all_data: pprint.pprint(k)
-
-
-
+# generate input data
+# [ flop_hand_matrix, river_hand_matrix, turn_hand_matrix, player_hand_matrix, [player_1_deal, player2_deal], ]
+# generate outcome data 
+# [ [player_1_win, player_2_win]
 if __name__ == '__main__':
     train_model()

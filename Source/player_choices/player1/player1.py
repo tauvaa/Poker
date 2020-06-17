@@ -29,4 +29,4 @@ def player1_handle_outcome(game_info):
 
 def player1choice(gamestate):
     # print(gamestate['betting_info']['min_bet'])
-    return check_through(gamestate)
+    return random_choice(gamestate)
