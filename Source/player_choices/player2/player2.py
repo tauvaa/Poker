@@ -4,11 +4,11 @@ import time
 import numpy as np
 import json
 from os.path import dirname, join
-from Source.player_choices.examples.player_input import random_choice, check_through,check_pairs
+from Source.player_choices.examples.player_input import random_choice, check_through, check_pairs
 
 
 def player2_handle_outcome(game_info):
-    with open(join(dirname(__file__),'games_played'), 'a+') as f:
+    with open(join(dirname(__file__), 'games_played'), 'a+') as f:
         com_cards = game_info['community_cards']
         player_cards = game_info['player_cards']
         del game_info['player_cards']
@@ -17,13 +17,16 @@ def player2_handle_outcome(game_info):
         # print(player_cards)
         f.write(json.dumps(game_info))
         f.write(f"\n {''.join(['=' for _ in range(100)])}\n")
+
+
 def get_state_cards(cards):
     cards = cards['cards']
     if len(cards) == 0:
         return ''
     return ' | '.join(cards)
-def player2choice(gamestate):
 
+
+def player2choice(gamestate):
     """Play put the algorithm in here.  Input will be the gamestate formated
         {
         player_info:{}
@@ -35,4 +38,4 @@ def player2choice(gamestate):
     return dictionary with {'choice': your choice, 'amount':bet amount}
     amount is only required when choice=bet
     """
-    return check_pairs(gamestate)
+    return check_through(gamestate)

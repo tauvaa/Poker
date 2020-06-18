@@ -1,5 +1,6 @@
 venv
 __pycache__
 *.idea*
-Source/player_choices/player1/data_store
-Source/player_choices/player2/games_played
+Source/player_choices/player1/data_store/*
+Source/player_choices/player1/games_played/*
+Source/player_choices/player2/games_played/*
