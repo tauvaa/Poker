@@ -54,10 +54,12 @@ class Betting:
         if self.is_player1_betting:
             info['player_info'] = self.game.get_player_info(self.game.player1)
             decision = player1choice(info)
+            print('player 1 choice:',decision)
 
         else:
             info['player_info'] = self.game.get_player_info(self.game.player2)
             decision = player2choice(info)
+            print('player 2 choice:',decision)
         return decision
 
     def choice(self):
@@ -245,7 +247,7 @@ class Game:
         if self.game_count % 100 == 0 and 2*self.big_blind<starting_bank:
             self.small_blind = 2*self.small_blind
             self.big_blind = 2*self.big_blind
-            print(self.big_blind, self.small_blind)
+            print('blinds', self.big_blind, self.small_blind)
         self.deck = Deck() # re-initalize deck
         self.deck.shuffle()
         assert len(self.deck.cards) == 52
@@ -438,7 +440,7 @@ class Game:
         board = sep_char.join(['board: ', flop_string, turn_string, river_string])
         player1_string = sep_char.join(['player 1: '] +[x.card_string() for x in self.player1.cards])
         player2_string = sep_char.join(['player 2: '] + [x.card_string() for x in self.player2.cards])
-        print(''.join(['=' for _ in range(100)]))
+        print(''.join(['/' for _ in range(100)]))
         print(board)
         print(player1_string)
         print(player2_string)
@@ -478,7 +480,7 @@ class Game:
     # ==========================================   HAND STUFF  =======================================================
     # ================================================================================================================
     def play_hand(self):
-        print(''.join(['+' for _ in range(10)]+['new game'] + ['+' for _ in range(10)]))
+        print(''.join(['+' for _ in range(10)]+['new hand'] + ['+' for _ in range(10)]))
         self.new_hand()
         self._start_hand()
         is_fold = self.bet()
@@ -488,18 +490,21 @@ class Game:
             self.player1_betting = not self.player1_betting  # after opening betting switch so dealer doesn't bet first
             self._flop()
             self.flop.print_state()
+            print('pot:', self.pot)
             is_fold = self.bet()
         # =========================== TURN ===========================
         if not is_fold:
             self.switch_state()
             self._turn()
             self.turn.print_state()
+            print('pot:', self.pot)
             is_fold = self.bet()
         # =========================== RIVER ===========================
         if not is_fold:
             self.switch_state()
             self._river()
             self.river.print_state()
+            print('pot:', self.pot)
             is_fold = self.bet()
         # =========================== SHOWDOWN ===========================
         if not is_fold:
@@ -510,12 +515,13 @@ class Game:
             self.showdown()
             if self.winner.player_name != 'draw':
                 self.update_pot(-1*self.pot, self.winner)
+                print('draw')
             else:
                 draw_pot = self.pot
                 self.update_pot(-1 * draw_pot / 2, self.player1)
                 self.update_pot(-1 * draw_pot / 2, self.player2)
 
-
+            print('hand winner:',self.winner.player_name)
             print(f'player 1: {self.player1_info}')
             print(f'player 2: {self.player2_info}')
             self.print_board()

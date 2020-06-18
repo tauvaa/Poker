@@ -6,7 +6,7 @@ import json
 from os.path import dirname, join
 
 def generic_handle_outcome(game_info):
-    print(game_info)
+    pass
     # with open(join(dirname(__file__),'games_played'), 'a+') as f:
         # f.write(json.dumps(game_info))
         # f.write(f"\n {''.join(['=' for _ in range(100)])}\n")
@@ -19,14 +19,12 @@ def get_state_cards(cards):
 def check_pairs(gamestate):
     player_hand = gamestate['player_info']['hand']['hand_matrix']
     compress = np.matmul(np.transpose(player_hand), np.ones(4))
-    print(compress)
     if compress.max()>1 or sum(compress[10:])>1:
         if 'bet' in gamestate['betting_info']['betting_options']:
 
             return {'choice': 'bet', 'amount':50}
 
         elif 'call' in gamestate['betting_info']['betting_options']:
-            print(f'here are the betting options: {gamestate["betting_info"]["betting_options"]}')
             return {'choice': 'call'}
         else:
             return {'choice': 'check'}
@@ -35,7 +33,6 @@ def check_pairs(gamestate):
 
 def setup(gamestate,player=''):
     space = ''.join(['\n' for _ in range(5)])
-    print(f"{space}DECISION {player}")
     player_info = gamestate['player_info']
     betting_info = gamestate['betting_info']
     flop = player_info['flop']
@@ -48,15 +45,9 @@ def setup(gamestate,player=''):
     for state, string in state_strings:
         if len(string) > 0:
             board_string += f'| {string}'
-    if len(board_string)>0:
-        print(f'board: {board_string}')
     to_call = betting_info['to_call']
     prev_choice = betting_info['previous_choice']
     player_banks = betting_info['player_banks']
-    for x in player_banks:
-        print(f'{x} bank: {player_banks[x]}')
-    print(f'previous choice: {prev_choice}')
-    print(f'to call: {to_call}')
 
 def random_choice(gamestate, player=''):
     setup(gamestate, player)

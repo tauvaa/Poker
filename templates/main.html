@@ -1,0 +1,177 @@
+<html>
+  <head>
+    <!-- CSS only -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+<!-- JS, Popper.js, and jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+<style>
+
+.btn {
+  margin: 10px;
+}
+.hand {
+  margin-left: 30px;
+}
+
+
+.scroll {
+  overflow: scroll;
+}
+
+.table-row {
+  min-height: 80vh;
+  max-height: 80vh;
+}
+.full-height {
+  min-height: 100vh;
+  max-height: 100vh;
+}
+
+
+</style>
+  <script>
+var turn_list_g = null;
+var turn_counter = 0;
+function startHand(element, p1cards, p2cards, p1bank, p2bank)
+{
+  $(element).siblings().collapse('hide');
+  $('#p1-cards').html(p1cards);
+  $('#p2-cards').html(p2cards);
+  $('#p1-bank').html('bank: ' + p1bank);
+  $('#p2-bank').html('bank: ' + p2bank);
+  turn_list_g = null;
+  turn_counter = 0;
+  $("#table-cards").html("");
+  $("#pot").html("");
+  $("#actions").html("");
+  $("#hand-winner").html("");
+
+}
+function nextTurn(turn_list) {
+  if (turn_list_g == null)
+  {
+    turn_list_g = turn_list;
+  }
+  current_turn = turn_list_g[turn_counter];
+  console.log(current_turn);
+  if(typeof current_turn == 'undefined')
+  {
+    console.log('done');
+    return;
+  }
+  if (current_turn.choice)
+  {
+    $("#actions").append(`<p>${current_turn.choice}</p>`);
+    var children = document.querySelector('#actions').children;
+    children[children.length - 1].scrollIntoViewIfNeeded();
+
+  }
+  if (current_turn.cards)
+  {
+    $("#table-cards").append(`<span> | ${current_turn.cards}</span>`);
+  }
+  if (current_turn.pot)
+  {
+    $("#pot").html(current_turn.pot);
+  }
+  if (current_turn.winner)
+  {
+    $("#hand-winner").html(current_turn.winner);
+  }
+  turn_counter++;
+
+
+}
+  </script>
+  </head>
+  <body>
+    <div class="container">
+    <div class="row">
+      <div class="col-sm scroll full-height">
+
+        <a class="btn btn-secondary" href="#games" data-toggle="collapse" 
+          role="button" aria-expanded="false" aria-conrols="games">Games</a>
+        <div id="games" class="collapse">
+          {% for game in games %}
+            {% set gamenum = loop.index %}
+            <a class="btn btn-secondary" href="#game-{{loop.index}}" data-toggle="collapse"
+              role="button" aria-expanded="false" aria-controls="game-{{loop.index}}">Game {{ loop.index }}</a>
+            <div id="game-{{loop.index}}" class="collapse">
+
+
+              {% for hand in game.hands %}
+                {% set handnum = loop.index %} 
+                <a class="btn btn-secondary hand" href="#hand-{{gamenum}}-{{loop.index}}" 
+                  data-toggle="collapse" role="button" aria-expanded="false" 
+                  aria-controls="hand-{{gamenum}}-{{loop.index}}"
+                  onclick="startHand(this, {{hand.player1.cards}}, {{hand.player2.cards}}, {{hand.player1.bank}}, {{hand.player2.bank}})">Hand {{loop.index}}</a>
+                <div id="hand-{{gamenum}}-{{loop.index}}" class="collapse">
+                  <button class="btn btn-success turn" type="button" onclick="nextTurn({{hand.turns}})">
+                    Next Turn
+                  </button>
+
+                </div><br>
+              {% endfor %}
+
+
+            
+            </div>
+            <a class="btn btn-secondary" href="#winner-{{gamenum}}"
+              data-toggle="collapse" role="button" aria-expanded="false" 
+              aria-conrols="winner-{{gamenum}}">Winner</a>
+            <div id="winner-{{gamenum}}" class="collapse">
+              {{ game.winner[0]}}
+            </div>
+            <br>
+            
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="col-lg full-height">
+        <div class="row table-row">
+          <div class="col-md">
+            <div id="table" class="table-row">
+              Table
+              <div class="row table-row">
+                <div class="col-sm">
+                  POT: 
+                  <div id="pot"></div>
+                  <br>
+                  <div id="hand-winner"></div>
+                </div>
+                <div class="col-sm">
+                  <div id="table-cards"></div>
+                </div>
+                <div class="col-sm scroll table-row">
+                  <div id="actions" class="scroll"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md">
+            <div id="p1">
+              P1
+              <div id="p1-cards"></div>
+              <div id="p1-bank"></div>
+            </div>
+          </div>
+          <div class="col-md">
+            <div id="p2">
+              P2
+              <div id="p2-cards"></div>
+              <div id="p2-bank"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </div>
+  </body>
+</html>
