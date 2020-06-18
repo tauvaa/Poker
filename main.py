@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import sys
 from Source.game import play
-import Source.player_choices.cindy.model as cindy_model
 
 
 def main():
