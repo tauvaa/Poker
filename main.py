@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 import sys
 from Source.game import play
-import Source.player_choices.player1.training1 as t
-
-
-def train():
-    t.train_model()
+import Source.player_choices.cindy.model as cindy_model
 
 
 def main():
@@ -25,4 +21,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    model = cindy_model.init()
+    cindy_model.save(model)

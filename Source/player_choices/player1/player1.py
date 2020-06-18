@@ -7,7 +7,6 @@ import pickle
 from os.path import join, dirname
 from os import listdir
 from Source.player_choices.examples.player_input import playin_with_yourself, random_choice, check_pairs, check_through
-import Source.player_choices.player1.player_training1 as pt1
 
 
 def player1_handle_outcome(game_info):
