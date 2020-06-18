@@ -14,7 +14,7 @@ def handle_outcome(game_info):
     return
 
 
-def chooe(gamestate):
+def choose(gamestate):
     prediction = cindy_model.predict(gamestate)
     if 'check' not in gamestate['betting_info']['betting_options']:
         if (prediction.max() > 0.75):

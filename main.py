@@ -21,5 +21,4 @@ def main():
 
 
 if __name__ == '__main__':
-    model = cindy_model.init()
-    cindy_model.save(model)
+    main()
