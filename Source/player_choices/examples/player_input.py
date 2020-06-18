@@ -65,7 +65,7 @@ def random_choice(gamestate, player=''):
     # with open('player_options', 'a+') as f:
     #     f.write(f'{option}\n')
     if option == 'bet':
-        return {'choice':option,'amount':25}
+        return {'choice':option,'amount':betting_options['']}
     if option == 'call':
         return {'choice': 'call'}
     if option == 'check' or (option=='fold' and 'check' in betting_options):

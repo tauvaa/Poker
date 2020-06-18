@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 import sys
 from Source.game import play
-
+import Source.player_choices.player1.training as t
 def main():
-    play()
+    t.train_model()
+    # play()
 if __name__ == '__main__':
-    number_games = 1
+    # main()
+    number_games = 200
+
     if len(sys.argv) > 1:
         number_games = int(sys.argv[1])
 
