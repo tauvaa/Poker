@@ -8,8 +8,9 @@ import datetime
 from tensorflow import keras
 from keras.models import Sequential
 from keras.layers import Dense
-from tensorflow.python.keras.callbacks import TensorBoard
+from keras.callbacks import TensorBoard
 import joblib
+from sklearn.model_selection import train_test_split
 
 from os import listdir
 from os.path import dirname, join, exists
@@ -90,15 +91,31 @@ def parse_data(game_info_array):
 
 
 def train(model, x_train, y_train):
-    #fit it to the dataset
-    model.fit(x_train, y_train, epochs=10, batch_size=32)
-    #evaluate
-    _, accuracy = model.evaluate(x_train, y_train)
-    print('Accuracy: %.2f' % (accuracy * 100))
-    log_dir = join(dirname(__file__), "logs/fit")
-    log_file = log_dir + "/{}" + datetime.datetime.now().strftime(
+    log_dir = join(dirname(__file__), "logs/")
+    tensor_log = log_dir + "fit/{}" + datetime.datetime.now().strftime(
         "%Y%m%d-%H%M%S")
-    tensorboard = TensorBoard(log_dir=log_file, histogram_freq=1)
+    tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
+    #fit it to the dataset
+    x_train, x_val, y_train, y_val = train_test_split(x_train,
+                                                      y_train,
+                                                      test_size=0.20,
+                                                      shuffle=True)
+
+    history = model.fit(
+        x_train,
+        y_train,
+        epochs=150,
+        batch_size=32,
+        validation_data=(x_val, y_val),
+        callbacks=[tensorboard_callback],
+    )
+    #evaluate
+    loss, accuracy = model.evaluate(x_train, y_train)
+    with open(log_dir + 'log.txt', "a") as log:
+        log.write('Accuracy: %.2f' % (accuracy * 100) + ', Loss: %.2f' %
+                  (loss * 100) + '\n')
+        log.write(str(history.history))
+        log.write('\n--------------------\n')
     save(model)
 
 

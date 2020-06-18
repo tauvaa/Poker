@@ -4,7 +4,7 @@ from Source.game import play
 
 
 def main():
-    number_games = 10
+    number_games = 1000
     if len(sys.argv) > 1:
         number_games = int(sys.argv[1])
 
