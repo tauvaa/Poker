@@ -3,16 +3,19 @@
 import pickle
 import numpy as np
 from itertools import repeat
+import datetime
 
 from tensorflow import keras
 from keras.models import Sequential
 from keras.layers import Dense
+from tensorflow.python.keras.callbacks import TensorBoard
+import joblib
 
 from os import listdir
-from os.path import dirname, join
+from os.path import dirname, join, exists
 import pprint
 
-MODEL_NAME = 'model'
+MODEL_NAME = 'model.pkl'
 
 
 def init():
@@ -23,21 +26,25 @@ def init():
     model.add(Dense(8, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
     model.summary()
-    # compile model
     model.compile(loss='binary_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
     save(model)
-    # save
     return model
 
 
 def save(model):
-    model.save(join(dirname(__file__), MODEL_NAME))
+    joblib.dump(model, join(dirname(__file__), MODEL_NAME))
 
 
 def load():
-    return keras.models.load_model(join(dirname(__file__), MODEL_NAME))
+    model_file = join(dirname(__file__), MODEL_NAME)
+    if exists(model_file):
+        model = joblib.load(join(dirname(__file__), MODEL_NAME))
+    else:
+        model = init()
+    model.summary()
+    return model
 
 
 def save_data(game_info):
@@ -84,11 +91,15 @@ def parse_data(game_info_array):
 
 def train(model, x_train, y_train):
     #fit it to the dataset
-    model.fit(x_train, y_train, epochs=150, batch_size=32)
+    model.fit(x_train, y_train, epochs=10, batch_size=32)
     #evaluate
     _, accuracy = model.evaluate(x_train, y_train)
     print('Accuracy: %.2f' % (accuracy * 100))
-    model.save(join(dirname(__file__), 'training_check_through_model'))
+    log_dir = join(dirname(__file__), "logs/fit")
+    log_file = log_dir + "/{}" + datetime.datetime.now().strftime(
+        "%Y%m%d-%H%M%S")
+    tensorboard = TensorBoard(log_dir=log_file, histogram_freq=1)
+    save(model)
 
 
 def predict(model, gamestate):

@@ -13,14 +13,13 @@ model = cindy_model.load()
 realtime_data = []
 
 TRAINING = True
-BATCH_SIZE = 1000
+HANDS_PLAYED_BATCH_SIZE = 1000
 
 
 def train(gamestate):
-    if len(realtime_data) < BATCH_SIZE:
+    if len(realtime_data) < HANDS_PLAYED_BATCH_SIZE:
         realtime_data.append(gamestate)
     else:
-        realtime_data.clear()
         [x_train, y_train] = cindy_model.parse_data(realtime_data)
         cindy_model.train(model, x_train, y_train)
         realtime_data.clear()
