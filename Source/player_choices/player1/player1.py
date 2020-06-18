@@ -7,6 +7,8 @@ import pickle
 from os.path import join, dirname
 from os import  listdir
 from Source.player_choices.examples.player_input import playin_with_yourself, random_choice, check_pairs, check_through
+import Source.player_choices.player1.player_training1 as pt1
+
 def player1_handle_outcome(game_info):
     # print(game_info)
     com_cards = game_info['community_cards']
@@ -29,4 +31,4 @@ def player1_handle_outcome(game_info):
 
 def player1choice(gamestate):
     # print(gamestate['betting_info']['min_bet'])
-    return random_choice(gamestate)
+    return pt1.player1choice(gamestate)
