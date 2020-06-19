@@ -104,7 +104,7 @@ def train(model, x_train, y_train):
     history = model.fit(
         x_train,
         y_train,
-        epochs=150,
+        epochs=50,
         batch_size=32,
         validation_data=(x_val, y_val),
         callbacks=[tensorboard_callback],
