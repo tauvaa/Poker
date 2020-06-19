@@ -35,26 +35,25 @@ def open_load_append(file_name, new_object):
         f.write(pickle.dumps(to_app))
 
 def player1_handle_outcome(game_info):
-    return
 
-    next_data_file = listdir(join(dirname(__file__), 'data_store', 'outcome_data'))
-    next_data_file = [x for x in next_data_file if x not in('outcome_data', 'state_data','test')]
-    if len(next_data_file) == 0:
-        next_data_file = 0
-    else:
-        next_data_file = [int(n) for n in next_data_file]
-        next_data_file = max(next_data_file) + 1
-    with open(join(dirname(__file__),'data_store/outcome_data',str(next_data_file)), 'ab+') as f:
-        f.write(pickle.dumps(game_info))
+    # next_data_file = listdir(join(dirname(__file__), 'data_store', 'outcome_data'))
+    # next_data_file = [x for x in next_data_file if x not in('outcome_data', 'state_data','test')]
+    # if len(next_data_file) == 0:
+    #     next_data_file = 0
+    # else:
+    #     next_data_file = [int(n) for n in next_data_file]
+    #     next_data_file = max(next_data_file) + 1
+    # with open(join(dirname(__file__),'data_store/outcome_data',str(next_data_file)), 'ab+') as f:
+    #     f.write(pickle.dumps(game_info))
 
         # f.write()
         # f.write(f"\n {''.join(['=' for _ in range(100)])}\n")
 
 
 
-    prefix = 'game_outcomes'
+    prefix = 'game_outcomes-9'
     save_files = [int(x.split('_')[-1]) for x in listdir(join(dirname(__file__), 'data_store', 'state_data')) if x.startswith(prefix)]
-    print(game_info)
+    # print(game_info)
     postfix = max(save_files)
     file_name = f'{prefix}_{postfix}'
     with open(join(dirname(__file__),'data_store', 'state_data', file_name)) as f:
@@ -135,9 +134,9 @@ def model_user(gamestate, flatten=True):
             return {'choice':'check'}
 
 
-def run_model(gamestate, model_name):
-    flatten = 'flatten' in model_name
-    model_paths = {x: model_name for x in 'flop turn river preflop'.split()}
+def run_model(gamestate, prefix):
+    flatten = 'flatten' in prefix
+    model_paths = {x: f'{x}{prefix}' for x in 'flop turn river preflop'.split()}
     pp = PokerPlayer(model_paths, gamestate['player_info']['state'], transform_data(gamestate), flatten=flatten)
     perc = pp.apply_model(transform_data(gamestate))
     perce = perc.detach().numpy()[0]
@@ -174,25 +173,30 @@ def player1choice(gamestate):
     #     f.write(pickle.dumps(gamestate))
     # return check_pairs(gamestate)
     # return model_user(gamestate)
-    return model_reader(gamestate, 'challenge')
-    # prefix = 'game_outcomes'
-    # save_files = [int(x.split('_')[-1]) for x in listdir(join(dirname(__file__),'data_store', 'state_data')) if x.startswith(prefix)]
-    # postfix = 0
-    #
-    # if gamestate['player_info']['state'] == 'preflop':
-    #     if len(save_files) > 0:
-    #         postfix = max(save_files) + 1
-    #
-    #     with open(join(dirname(__file__), 'data_store','state_data', f'{prefix}_{postfix}'), 'w+') as f:
-    #         f.write(json.dumps({}))
-    # else:
-    #     postfix = max(save_files)
-    # file_name = f'{prefix}_{postfix}'
-    # with open(join(dirname(__file__),'data_store', 'state_data', file_name)) as f:
-    #     dic = json.load(f)
-    #     dic[gamestate['player_info']['state']] = float(perc.detach().numpy()[0])
-    # with open(join(dirname(__file__),'data_store' ,'state_data', file_name), 'w') as f:
-    #     f.write(json.dumps(dic))
 
+    prefix = 'game_outcomes-9'
+    save_files = [int(x.split('_')[-1]) for x in listdir(join(dirname(__file__),'data_store', 'state_data')) if x.startswith(prefix)]
+    postfix = 0
+    #
+    model_paths = {x: f'{x}_9' for x in 'flop turn river preflop'.split()}
+    pp = PokerPlayer(model_paths, gamestate['player_info']['state'], transform_data(gamestate), flatten=False)
+    perc = pp.apply_model(transform_data(gamestate))
+    if gamestate['player_info']['state'] == 'preflop':
+        if len(save_files) > 0:
+            postfix = max(save_files) + 1
+    #
+        with open(join(dirname(__file__), 'data_store','state_data', f'{prefix}_{postfix}'), 'w+') as f:
+            f.write(json.dumps({}))
+    else:
+        postfix = max(save_files)
+    file_name = f'{prefix}_{postfix}'
+    with open(join(dirname(__file__),'data_store', 'state_data', file_name)) as f:
+        dic = json.load(f)
+        dic[gamestate['player_info']['state']] = float(perc.detach().numpy()[0])
+    with open(join(dirname(__file__),'data_store' ,'state_data', file_name), 'w') as f:
+        f.write(json.dumps(dic))
+
+    return check_through(gamestate)
+    return run_model(gamestate, '_9')
 
     #return check_through(gamestate)
