@@ -10,7 +10,7 @@ from Source.player_choices.player1.nerual_network import setup_nn
 from torch import Tensor
 import torch
 class TrainUnit:
-    flatten = True
+    flatten = False
     def __init__(self,hand_matrix, community_cards, outcome):
         x = np.zeros(shape=(4,13))
         for j in community_cards:
@@ -101,7 +101,7 @@ def condense_data(number_units=10000, run_all=False):
     return all_data
 
 def train_model(state, batch_size):
-    data = condense_data(50000)
+    data = condense_data(75000)
     if state == 'flop':
         data = ([x.outcome, x.flop_array] for x in data)
     elif state == 'turn':

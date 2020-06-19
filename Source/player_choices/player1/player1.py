@@ -11,8 +11,7 @@ from .poker_player.poker_player import PokerPlayer
 from .training import TrainUnit
 with open(join(dirname(__file__), 'king_of_the_hill'), 'r') as f:
     KING=f.read()
-with open('bid_coff') as f:
-    BID_COFF = int(f.read().strip())
+
 def transform_data(gamestate):
     player_info = gamestate['player_info']
     hand = player_info['hand']['hand_matrix']
@@ -74,7 +73,7 @@ def model_reader(gamestate, fn_name):
     pp = PokerPlayer(model_paths, gamestate['player_info']['state'], transform_data(gamestate), flatten=flatten)
     perc = pp.apply_model(transform_data(gamestate))
     perce = perc.detach().numpy()[0]
-    min_bet = max(25, int(gamestate['betting_info']['min_bet']))
+    min_bet = max(50, int(gamestate['betting_info']['min_bet']))
     to_call = int(gamestate['betting_info']['to_call'])
     pot_worth = 1.25 * (1 / 0.4) * perce * min_bet - to_call
     betting_options = gamestate['betting_info']['betting_options']
@@ -141,9 +140,9 @@ def run_model(gamestate, prefix):
     pp = PokerPlayer(model_paths, gamestate['player_info']['state'], transform_data(gamestate), flatten=flatten)
     perc = pp.apply_model(transform_data(gamestate))
     perce = perc.detach().numpy()[0]
-    min_bet = max(25, int(gamestate['betting_info']['min_bet']))
+    min_bet = max(50, int(gamestate['betting_info']['min_bet']))
     to_call = int(gamestate['betting_info']['to_call'])
-    pot_worth = BID_COFF*1.25 * (1 / 0.4) * perce * min_bet - to_call
+    pot_worth = 1.25 * (1 / 0.4) * perce * min_bet - to_call
     betting_options = gamestate['betting_info']['betting_options']
     if pot_worth < 0 and 'check' not in betting_options:
         return {'choice': 'fold'}
