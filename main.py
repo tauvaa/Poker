@@ -8,7 +8,7 @@ def main():
 
 
 if __name__ == '__main__':
-    number_games = 1
+    number_games = 5
     if len(sys.argv) > 1:
         number_games = int(sys.argv[1])
 
