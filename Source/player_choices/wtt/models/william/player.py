@@ -17,7 +17,9 @@ def player_handle_outcome(gamestate):
 
 
 def playerchoice(gamestate):
-    prediction = model.predict(gamestate)
+    hand = np.array([np.array(gamestate['player_info']['hand']['hand_matrix'],
+                              dtype=bool).flatten()])
+    prediction = model.predict(hand)
     if 'check' not in gamestate['betting_info']['betting_options']:
         if (prediction.max() > 0.75):
             return {'choice': 'bet', 'amount': 25}
