@@ -12,7 +12,7 @@ import Source.player_choices.wtt.models.tyson.model as tyson_model
 model = tyson_model.load()
 realtime_data = []
 
-TRAINING = True
+TRAINING = False
 HANDS_PLAYED_BATCH_SIZE = 10000
 REALTIME = False
 
