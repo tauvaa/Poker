@@ -38,8 +38,10 @@ def should_bet(prediction):
         return False
     else:
         # bluff
-        if random() > 0.99 or prediction > 0.75:
+        if random() > 0.99 or prediction > 0.85:
             return True
+        else:
+            return False
 
 
 def choose(gamestate):
