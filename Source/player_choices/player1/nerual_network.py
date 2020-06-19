@@ -13,10 +13,10 @@ class Net(nn.Module):
         super(Net, self).__init__()
         # 1 input image channel, 6 output channels, 3x3 square convolution
         # kernel
-        self.l1 = nn.Linear(start_length, 40)
+        self.l1 = nn.Linear(start_length, 10)
         # self.l2 = nn.Linear(40,30)
-        self.l3 = nn.Linear(30, 15)
-        self.l4 = nn.Linear(15,7)
+        self.l3 = nn.Linear(10, 4)
+        self.l4 = nn.Linear(4,1)
         # self.l5 = nn.Linear(7, 3)
         # self.l6 = nn.Linear(3,1)
         # self.conv1 = nn.Conv2d(1, 6, 3)

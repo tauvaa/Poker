@@ -133,6 +133,33 @@ def model_user(gamestate, flatten=True):
             return {'choice':'call'}
         else:
             return {'choice':'check'}
+
+
+def run_model(gamestate, model_name):
+    flatten = 'flatten' in model_name
+    model_paths = {x: model_name for x in 'flop turn river preflop'.split()}
+    pp = PokerPlayer(model_paths, gamestate['player_info']['state'], transform_data(gamestate), flatten=flatten)
+    perc = pp.apply_model(transform_data(gamestate))
+    perce = perc.detach().numpy()[0]
+    min_bet = max(25, int(gamestate['betting_info']['min_bet']))
+    to_call = int(gamestate['betting_info']['to_call'])
+    pot_worth = 1.25 * (1 / 0.4) * perce * min_bet - to_call
+    betting_options = gamestate['betting_info']['betting_options']
+    if pot_worth < 0 and 'check' not in betting_options:
+        return {'choice': 'fold'}
+    elif pot_worth < min_bet:
+
+        if 'call' in betting_options:
+            return {'choice': 'call'}
+        else:
+            return {'choice': 'check'}
+    else:
+        if 'bet' in betting_options:
+            return {'choice': 'bet', 'amount': min_bet}
+        elif 'call' in betting_options:
+            return {'choice': 'call'}
+        else:
+            return {'choice': 'check'}
 def player1choice(gamestate):
     # print(gamestate['betting_info']['min_bet'])
     # next_data_file = listdir(join(dirname(__file__), 'state_data'))
