@@ -37,8 +37,8 @@ def should_bet(prediction):
     if prediction < 0.20:
         return False
     else:
-        # bluff or greater than threshold to win
-        if (random() > 0.97) or (prediction > 0.65):
+        # bluff
+        if random() > 0.99 or prediction > 0.75:
             return True
 
 
