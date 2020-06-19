@@ -8,6 +8,7 @@ from os.path import join, dirname
 from os import listdir
 from Source.player_choices.examples.player_input import check_through
 import Source.player_choices.wtt.models.tyson.model as tyson_model
+from random import random
 
 model = tyson_model.load()
 realtime_data = []
@@ -32,10 +33,21 @@ def player_handle_outcome(gamestate):
     return
 
 
+def should_bet(prediction):
+    if prediction < 0.20:
+        return False
+    else:
+        # bluff
+        if random() > 0.99 or prediction > 0.85:
+            return True
+        else:
+            return False
+
+
 def choose(gamestate):
     prediction = tyson_model.predict(model, gamestate)
     if 'check' not in gamestate['betting_info']['betting_options']:
-        if (prediction.max() > 0.75):
+        if (should_bet(prediction.max())):
             return {'choice': 'bet', 'amount': 25}
         return {'choice': 'call'}
     return {'choice': 'check'}

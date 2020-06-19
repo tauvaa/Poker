@@ -4,7 +4,7 @@ import time
 import numpy as np
 import json
 from os.path import dirname, join
-from Source.player_choices.examples.player_input import random_choice, check_through
+from Source.player_choices.examples.player_input import random_choice, check_through, check_call
 
 import Source.player_choices.wtt.models.tolo.player1 as tolo_player
 import Source.player_choices.wtt.models.william.player as william_player
@@ -31,7 +31,7 @@ def get_state_cards(cards):
 
 
 def player2choice(gamestate):
-    return tolo_player.playerchoice(gamestate)
+    return check_call(gamestate)
     """Play put the algorithm in here.  Input will be the gamestate formated
         {
         player_info:{}
@@ -43,4 +43,4 @@ def player2choice(gamestate):
     return dictionary with {'choice': your choice, 'amount':bet amount}
     amount is only required when choice=bet
     """
-    return check_through(gamestate)
+    return check_call(gamestate)
