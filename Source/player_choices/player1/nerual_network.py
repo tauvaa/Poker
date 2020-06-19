@@ -3,18 +3,22 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 import torch.optim
 from os import listdir
 from os.path import dirname, join
 class Net(nn.Module):
 
-    def __init__(self):
+    def __init__(self, start_length):
         super(Net, self).__init__()
         # 1 input image channel, 6 output channels, 3x3 square convolution
         # kernel
-        self.l1 = nn.Linear(17, 10)
-        self.l2 = nn.Linear(10, 4)
-        self.l3 = nn.Linear(4,1)
+        self.l1 = nn.Linear(start_length, 40)
+        # self.l2 = nn.Linear(40,30)
+        self.l3 = nn.Linear(30, 15)
+        self.l4 = nn.Linear(15,7)
+        # self.l5 = nn.Linear(7, 3)
+        # self.l6 = nn.Linear(3,1)
         # self.conv1 = nn.Conv2d(1, 6, 3)
         # self.conv2 = nn.Conv2d(6, 16, 3)
         # # an affine operation: y = Wx + b
@@ -24,8 +28,11 @@ class Net(nn.Module):
 
     def forward(self, x):
         x = torch.sigmoid(self.l1(x))
-        x = torch.sigmoid(self.l2(x))
-        x = torch.sigmoid(self.l3(x))
+        # x = torch.sigmoid(self.l2(x))
+        x = torch.relu(self.l3(x))
+        x = torch.sigmoid(self.l4(x))
+        # x = torch.sigmoid(self.l5(x))
+        # x = torch.sigmoid(self.l6(x))
         # x = [round(k) for k in x]
         # x = torch.tensor(x)
         # Max pooling over a (2, 2) window
@@ -37,7 +44,7 @@ class Net(nn.Module):
         # x = F.relu(self.fc2(x))
         # x = self.fc3(x)
         return x
-def setup_nn(input, target, **kwargs):
+def setup_nn(batches, **kwargs):
     if 'save' in kwargs and kwargs['save']:
         if 'save_file' not in kwargs:
             raise RuntimeError("did not provide a save file")
@@ -53,27 +60,38 @@ def setup_nn(input, target, **kwargs):
         save = False
 
 
-    input = torch.from_numpy(input).float()
-    print(input)
-    target = torch.tensor(target).float()
-    net = Net()
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.01)
-    counter = 0
-    while True:
-        out = net(input)
-        if counter > 750000:
-            if save:
-                torch.save(net, save_file)
-            return net
-        counter += 1
-        crit = nn.BCELoss()
-        loss = crit(out, target).float()
-        # if loss < 0.4:
-        #     return out
-        if counter % 100 == 0:
-            print(counter)
-            print(loss)
 
-        net.zero_grad()
-        loss.backward()
-        optimizer.step()
+    net = Net(len(batches[0][0][0]))
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
+    counter = 0
+    epochs = 1
+    if 'epochs' in kwargs:
+        epochs = kwargs['epochs']
+    counter = 0
+    en=0
+    loss=0
+    bn=0
+    for _ in range(epochs):
+        en +=1
+        for x in batches:
+            bn += 1
+            if counter % 1000 == 0:
+                print(loss)
+                # print(f'batch_number {bn}')
+                # print(f'epoch {en}')
+            input, target = x[0], x[1]
+            input = torch.from_numpy(input).float()
+            target = torch.tensor(target).float()
+            out = net(input)
+
+            crit = nn.BCELoss()
+            loss = crit(out, target).float()
+
+            # if loss < 0.4:
+            #     return out
+            net.zero_grad()
+            loss.backward()
+            optimizer.step()
+        if save:
+            torch.save(net, save_file)
+    return net

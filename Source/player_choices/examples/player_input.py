@@ -23,7 +23,7 @@ def check_pairs(gamestate):
     if compress.max()>1 or sum(compress[10:])>1:
         if 'bet' in gamestate['betting_info']['betting_options']:
 
-            return {'choice': 'bet', 'amount':50}
+            return {'choice': 'bet', 'amount':max(50, gamestate['betting_info']['min_bet'])}
 
         elif 'call' in gamestate['betting_info']['betting_options']:
             print(f'here are the betting options: {gamestate["betting_info"]["betting_options"]}')
@@ -59,13 +59,13 @@ def setup(gamestate,player=''):
     print(f'to call: {to_call}')
 
 def random_choice(gamestate, player=''):
-    setup(gamestate, player)
+    #setup(gamestate, player)
     betting_options = gamestate['betting_info']['betting_options']
     option = random.choice(betting_options)
     # with open('player_options', 'a+') as f:
     #     f.write(f'{option}\n')
     if option == 'bet':
-        return {'choice':option,'amount':betting_options['']}
+        return {'choice':option,'amount':int(gamestate['betting_info']['min_bet'])+1}
     if option == 'call':
         return {'choice': 'call'}
     if option == 'check' or (option=='fold' and 'check' in betting_options):

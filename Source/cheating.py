@@ -138,7 +138,7 @@ def get_stats(dic):
         print(f'{x}: {dic[x]/total}')
 
 if __name__ == '__main__':
-    x = play_games(n_games=1000
+    x = play_games(n_games=1
                    ,player1_hand=[Card('Hearts', 11), Card('Diamonds', 11)]
                    ,player2_hand=[Card('Clubs', 9), Card('Clubs',8)]
                    # ,flop=[Card('Spades',x) for x in (12,13,14)]

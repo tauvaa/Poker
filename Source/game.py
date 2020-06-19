@@ -23,7 +23,7 @@ class Betting:
         self.betting_options = None
 
     def switch_bidder(self):
-        self.game.print_player_pots()
+        # self.game.print_player_pots()
         self.is_player1_betting = not self.is_player1_betting
 
     def get_betting_info(self):
@@ -137,7 +137,7 @@ class Betting:
         if self.first_call:
             self.first_call = False
         if amount < 0:
-            self.game.print_player_pots()
+            # self.game.print_player_pots()
             raise ValueError
         if self.is_player1_betting:
             self.game.update_pot(amount=amount, player=self.game.player1)
@@ -169,7 +169,7 @@ class Betting:
         return True
 
 class GameStates(HandMatrix):
-    def __init__(self, state_name=None, to_print=True):
+    def __init__(self, state_name=None, to_print=False):
         super(GameStates, self).__init__()
         self.state_name = state_name
         self.to_print = to_print
@@ -232,8 +232,9 @@ class Game:
         return player_info
 
     def print_player_pots(self):
-        print(f"player 1 bank: {self.player1.bank}")
-        print(f'player 2 bank: {self.player2.bank}')
+        print(f'{self.player1.bank}\t{self.player2.bank}')
+        # print(f"player 1 bank: {self.player1.bank}")
+        # print(f'player 2 bank: {self.player2.bank}')
 
     def new_hand(self):
         self.winner = None
@@ -245,7 +246,7 @@ class Game:
         if self.game_count % 100 == 0 and 2*self.big_blind<starting_bank:
             self.small_blind = 2*self.small_blind
             self.big_blind = 2*self.big_blind
-            print(self.big_blind, self.small_blind)
+            # print(self.big_blind, self.small_blind)
         self.deck = Deck() # re-initalize deck
         self.deck.shuffle()
         assert len(self.deck.cards) == 52
@@ -516,16 +517,16 @@ class Game:
                 self.update_pot(-1 * draw_pot / 2, self.player2)
 
 
-            print(f'player 1: {self.player1_info}')
-            print(f'player 2: {self.player2_info}')
-            self.print_board()
+            #print(f'player 1: {self.player1_info}')
+            #print(f'player 2: {self.player2_info}')
+            #self.print_board()
         self.end_game(is_fold)
 
 
 def play(game=None):
     if game is None:
-        player1 = Player('player 1')
-        player2 = Player('player 2')
+        player1 = Player('player 1',to_print=False )
+        player2 = Player('player 2', to_print=False)
         game = Game(player1, player2)
     while True:
         if game.player1.bank <=0:
