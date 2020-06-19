@@ -34,7 +34,7 @@ def open_load_append(file_name, new_object):
         f.write(pickle.dumps(to_app))
 
 
-def player1_handle_outcome(game_info):
+def player_handle_outcome(game_info):
     return
     # next_data_file = listdir(join(dirname(__file__), 'data_store', 'outcome_data'))
     # next_data_file = [x for x in next_data_file if x not in('outcome_data', 'state_data','test')]
@@ -168,7 +168,7 @@ def run_model(gamestate, prefix):
             return {'choice': 'check'}
 
 
-def player1choice(gamestate):
+def playerchoice(gamestate):
     # print(gamestate['betting_info']['min_bet'])
     # next_data_file = listdir(join(dirname(__file__), 'state_data'))
     # if len(next_data_file) == 0:

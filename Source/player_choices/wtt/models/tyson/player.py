@@ -26,7 +26,7 @@ def train(gamestate):
         realtime_data.clear()
 
 
-def player1_handle_outcome(gamestate):
+def player_handle_outcome(gamestate):
     if TRAINING:
         train(gamestate) if REALTIME else tyson_model.save_data(gamestate)
     return
@@ -41,5 +41,5 @@ def choose(gamestate):
     return {'choice': 'check'}
 
 
-def player1choice(gamestate):
+def playerchoice(gamestate):
     return check_through(gamestate) if TRAINING else choose(gamestate)

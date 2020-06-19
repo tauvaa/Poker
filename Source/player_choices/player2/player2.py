@@ -7,6 +7,7 @@ from os.path import dirname, join
 from Source.player_choices.examples.player_input import random_choice, check_through
 
 import Source.player_choices.wtt.models.tolo.player1 as tolo_player
+import Source.player_choices.wtt.models.william.player as william_player
 
 
 def player2_handle_outcome(game_info):
@@ -30,7 +31,7 @@ def get_state_cards(cards):
 
 
 def player2choice(gamestate):
-    return tolo_player.player1choice(gamestate)
+    return william_player.playerchoice(gamestate)
     """Play put the algorithm in here.  Input will be the gamestate formated
         {
         player_info:{}

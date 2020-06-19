@@ -33,4 +33,4 @@ def player1_handle_outcome(game_info):
 
 def player1choice(gamestate):
     # print(gamestate['betting_info']['min_bet'])
-    return tyson_player.player1choice(gamestate)
+    return tyson_player.playerchoice(gamestate)
