@@ -17,6 +17,8 @@ from os.path import dirname, join, exists
 import pprint
 
 MODEL_NAME = 'model.pkl'
+MODEL_WEIGHTS_NAME = 'model.h5'
+LOG = True
 
 
 def init():
@@ -27,11 +29,15 @@ def init():
     model.add(Dense(8, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
     model.summary()
+    compile(model)
+    save(model)
+    return model
+
+
+def compile(model):
     model.compile(loss='binary_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
-    save(model)
-    return model
 
 
 def save(model):
@@ -42,6 +48,7 @@ def load():
     model_file = join(dirname(__file__), MODEL_NAME)
     if exists(model_file):
         model = joblib.load(join(dirname(__file__), MODEL_NAME))
+        compile(model)
     else:
         model = init()
     model.summary()
@@ -94,29 +101,33 @@ def train(model, x_train, y_train):
     log_dir = join(dirname(__file__), "logs/")
     tensor_log = log_dir + "fit/{}" + datetime.datetime.now().strftime(
         "%Y%m%d-%H%M%S")
-    tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
+    tensorboard_callback = TensorBoard(log_dir=log_dir,
+                                       histogram_freq=1) if LOG else []
     #fit it to the dataset
     x_train, x_val, y_train, y_val = train_test_split(x_train,
                                                       y_train,
                                                       test_size=0.20,
                                                       shuffle=True)
-
     history = model.fit(
         x_train,
         y_train,
-        epochs=50,
+        epochs=150,
         batch_size=32,
         validation_data=(x_val, y_val),
         callbacks=[tensorboard_callback],
     )
     #evaluate
     loss, accuracy = model.evaluate(x_train, y_train)
-    with open(log_dir + 'log.txt', "a") as log:
-        log.write('Accuracy: %.2f' % (accuracy * 100) + ', Loss: %.2f' %
-                  (loss * 100) + '\n')
-        log.write(str(history.history))
-        log.write('\n--------------------\n')
+    output = 'Accuracy: %.2f' % (accuracy *
+                                 100) + ', Loss: %.2f' % (loss * 100) + '\n'
+    if LOG:
+        with open(log_dir + 'log.txt', "a") as log:
+            log.write(output)
+            log.write(str(history.history))
+            log.write('\n--------------------\n')
+    print(output)
     save(model)
+    exit()
 
 
 def predict(model, gamestate):

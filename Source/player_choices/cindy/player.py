@@ -14,6 +14,7 @@ realtime_data = []
 
 TRAINING = True
 HANDS_PLAYED_BATCH_SIZE = 10000
+REALTIME = False
 
 
 def train(gamestate):
@@ -27,7 +28,7 @@ def train(gamestate):
 
 def player1_handle_outcome(gamestate):
     if TRAINING:
-        train(gamestate)
+        train(gamestate) if REALTIME else cindy_model.save_data(gamestate)
     return
 
 
