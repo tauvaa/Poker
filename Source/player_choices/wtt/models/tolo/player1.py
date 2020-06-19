@@ -8,7 +8,6 @@ from os.path import join, dirname
 from os import listdir
 from Source.player_choices.examples.player_input import playin_with_yourself, random_choice, check_pairs, check_through
 from .poker_player.poker_player import PokerPlayer
-from .training import TrainUnit
 
 
 def transform_data(gamestate):

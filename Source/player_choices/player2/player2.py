@@ -31,7 +31,7 @@ def get_state_cards(cards):
 
 
 def player2choice(gamestate):
-    return william_player.playerchoice(gamestate)
+    return tolo_player.playerchoice(gamestate)
     """Play put the algorithm in here.  Input will be the gamestate formated
         {
         player_info:{}

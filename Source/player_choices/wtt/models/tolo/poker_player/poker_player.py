@@ -4,11 +4,14 @@ from os.path import dirname, join, split
 import torch
 import numpy as np
 
+
 class PokerPlayer:
 
     def __init__(self, trained_models, state, hand_matrix, flatten):
         for k in 'preflop flop turn river'.split():
-            trained_models[k] = join(split(dirname(__file__))[0],'trained_models', trained_models[k])
+            trained_models[k] = join(split(dirname(__file__))[
+                                     0], 'trained_models', trained_models[k])
+
         def f(n): return torch.load(trained_models[n])
         self.model = f(state)
         self.flatten = flatten
