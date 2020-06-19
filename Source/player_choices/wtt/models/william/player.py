@@ -6,10 +6,10 @@ import pprint
 import pickle
 from os.path import join, dirname
 from os import listdir
-from keras.models import load_model
+from tensorflow import keras
 
-MODEL_NAME = 'saved_model-1.pb'
-model = load_model(join(dirname(__file__), MODEL_NAME))
+MODEL_NAME = 'saved_model'
+model = keras.models.load_model(join(dirname(__file__), MODEL_NAME))
 
 
 def player_handle_outcome(gamestate):
