@@ -173,7 +173,8 @@ def playerchoice(gamestate):
     #     f.write(pickle.dumps(gamestate))
     # return check_pairs(gamestate)
     # return model_user(gamestate)
-    model_reader(gamestate, 'challenge')
+    return run_model(gamestate, '_6')
+    # model_reader(gamestate, 'challenge')
     prefix = 'game_outcomes-6'
     # save_files = [int(x.split('_')[-1]) for x in listdir(join(dirname(__file__),'data_store', 'state_data')) if x.startswith(prefix)]
     # postfix = 0
