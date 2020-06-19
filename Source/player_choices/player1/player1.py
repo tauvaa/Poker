@@ -11,7 +11,8 @@ from .poker_player.poker_player import PokerPlayer
 from .training import TrainUnit
 with open(join(dirname(__file__), 'king_of_the_hill'), 'r') as f:
     KING=f.read()
-
+with open('bid_coff') as f:
+    BID_COFF = int(f.read().strip())
 def transform_data(gamestate):
     player_info = gamestate['player_info']
     hand = player_info['hand']['hand_matrix']
@@ -142,7 +143,7 @@ def run_model(gamestate, prefix):
     perce = perc.detach().numpy()[0]
     min_bet = max(25, int(gamestate['betting_info']['min_bet']))
     to_call = int(gamestate['betting_info']['to_call'])
-    pot_worth = 1.25 * (1 / 0.4) * perce * min_bet - to_call
+    pot_worth = BID_COFF*1.25 * (1 / 0.4) * perce * min_bet - to_call
     betting_options = gamestate['betting_info']['betting_options']
     if pot_worth < 0 and 'check' not in betting_options:
         return {'choice': 'fold'}
@@ -173,12 +174,13 @@ def player1choice(gamestate):
     #     f.write(pickle.dumps(gamestate))
     # return check_pairs(gamestate)
     # return model_user(gamestate)
-
-    prefix = 'game_outcomes-9'
+    model_reader(gamestate, 'challenge')
+    prefix = 'game_outcomes-6'
     save_files = [int(x.split('_')[-1]) for x in listdir(join(dirname(__file__),'data_store', 'state_data')) if x.startswith(prefix)]
     postfix = 0
     #
-    model_paths = {x: f'{x}_9' for x in 'flop turn river preflop'.split()}
+    model_paths = {x: f'{x}_6' for x in 'flop turn river preflop'.split()}
+    # print(model_paths)
     pp = PokerPlayer(model_paths, gamestate['player_info']['state'], transform_data(gamestate), flatten=False)
     perc = pp.apply_model(transform_data(gamestate))
     if gamestate['player_info']['state'] == 'preflop':
@@ -196,7 +198,7 @@ def player1choice(gamestate):
     with open(join(dirname(__file__),'data_store' ,'state_data', file_name), 'w') as f:
         f.write(json.dumps(dic))
 
-    return check_through(gamestate)
-    return run_model(gamestate, '_9')
+    # return check_through(gamestate)
+    return run_model(gamestate, '_6')
 
     #return check_through(gamestate)
