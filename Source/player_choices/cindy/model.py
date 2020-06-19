@@ -17,7 +17,6 @@ from os.path import dirname, join, exists
 import pprint
 
 MODEL_NAME = 'model.pkl'
-MODEL_WEIGHTS_NAME = 'model.h5'
 LOG = True
 
 
@@ -127,7 +126,6 @@ def train(model, x_train, y_train):
             log.write('\n--------------------\n')
     print(output)
     save(model)
-    exit()
 
 
 def predict(model, gamestate):

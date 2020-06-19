@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 from Source.game import play
+import Source.player_choices.cindy.model as cindy_model
 
 
 def main():
@@ -20,4 +21,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    model = cindy_model.load()
+    data = cindy_model.load_data()
+    [x_train, y_train] = cindy_model.parse_data(data)
+    cindy_model.train(model, x_train, y_train)
