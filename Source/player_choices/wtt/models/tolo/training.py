@@ -6,13 +6,16 @@ from os import listdir
 from os.path import dirname, join
 import pprint
 import numpy as np
-from Source.player_choices.player1.nerual_network import setup_nn
+from Source.player_choices.wtt.models.tolo.nerual_network import setup_nn
 from torch import Tensor
 import torch
+
+
 class TrainUnit:
     flatten = True
-    def __init__(self,hand_matrix, community_cards, outcome):
-        x = np.zeros(shape=(4,13))
+
+    def __init__(self, hand_matrix, community_cards, outcome):
+        x = np.zeros(shape=(4, 13))
         for j in community_cards:
             x += j
         self.hole_matrix = hand_matrix - x
@@ -24,7 +27,6 @@ class TrainUnit:
         self._river_array()
         self.outcome = outcome
 
-
     def add_community_cards(self, mat):
         self.community_cards.append(mat)
 
@@ -35,24 +37,29 @@ class TrainUnit:
             return np.transpose(np.row_stack((pairs, suits)))[0]
         return mat.flatten()
 
-
     def get_suits(self, mat):
         # print(mat)
-        return np.matmul(mat, np.ones((13,1)))
+        return np.matmul(mat, np.ones((13, 1)))
 
     def get_pairs(self, mat):
         # print(mat)
-        return np.matmul(np.transpose(mat), np.ones((4,1)))
+        return np.matmul(np.transpose(mat), np.ones((4, 1)))
+
     def _hole_array(self):
         self.hole_array = self.make_array(self.hole_matrix)
 
     def _flop_array(self, ):
-        self.flop_array = self.make_array(self.community_cards[0] + self.hole_matrix)
+        self.flop_array = self.make_array(
+            self.community_cards[0] + self.hole_matrix)
 
     def _turn_array(self):
-        self.turn_array = self.make_array(self.community_cards[1] + self.hole_matrix + self.community_cards[0])
+        self.turn_array = self.make_array(
+            self.community_cards[1] + self.hole_matrix + self.community_cards[0])
+
     def _river_array(self):
-        self.river_array = self.make_array(self.community_cards[2] + self.hole_matrix + self.community_cards[0] + self.community_cards[1])
+        self.river_array = self.make_array(
+            self.community_cards[2] + self.hole_matrix + self.community_cards[0] + self.community_cards[1])
+
 
 def get_data():
     with open('data_store/outcome_data/test', 'rb') as f:
@@ -62,28 +69,31 @@ def get_data():
         for row in all_data:
             # print(row)
             hand_matrix = row['player_cards'][0]['player 1']['hand_matrix']
-            flop, turn, river = (row['community_cards'][x]['hand_matrix'] for x in ('flop', 'turn', 'river'))
+            flop, turn, river = (row['community_cards'][x]['hand_matrix']
+                                 for x in ('flop', 'turn', 'river'))
             outcome = row['winner']
             if outcome == 'player 1':
                 outcome = 1
             else:
                 outcome = 0
-            tu = TrainUnit(hand_matrix, community_cards=[flop, turn, river], outcome=outcome)
+            tu = TrainUnit(hand_matrix, community_cards=[
+                           flop, turn, river], outcome=outcome)
             X.append(tu)
     return X
 
 
 def transform_data(element):
     hand_matrix = element['player_cards'][0]['player 1']['hand_matrix']
-    flop, turn, river = (element['community_cards'][x]['hand_matrix'] for x in ('flop', 'turn', 'river'))
+    flop, turn, river = (element['community_cards'][x]['hand_matrix']
+                         for x in ('flop', 'turn', 'river'))
     outcome = element['winner']
     if outcome == 'player 1':
         outcome = 1
     else:
         outcome = 0
-    tu = TrainUnit(hand_matrix, community_cards=[flop, turn, river], outcome=outcome)
+    tu = TrainUnit(hand_matrix, community_cards=[
+                   flop, turn, river], outcome=outcome)
     return tu
-
 
 
 def condense_data(number_units=10000, run_all=False):
@@ -99,6 +109,7 @@ def condense_data(number_units=10000, run_all=False):
         if not run_all:
             count += 1
     return all_data
+
 
 def train_model(state, batch_size):
     data = condense_data(50000)
@@ -118,22 +129,25 @@ def train_model(state, batch_size):
 
     X = np.row_stack(X)
     Y = np.array(Y)
-    mask = np.random.rand(len(Y))>0.2
+    mask = np.random.rand(len(Y)) > 0.2
     X_train, Y_train = X[mask], Y[mask]
     X_test, Y_test = X[~mask], Y[~mask]
     position = 0
     training_batches = []
     while len(Y_train) - position >= batch_size:
-        training_batches.append([X_train[position: position+batch_size], Y_train[position: position+batch_size]])
+        training_batches.append(
+            [X_train[position: position+batch_size], Y_train[position: position+batch_size]])
         position += batch_size
     # print(training_batches)
     if TrainUnit.flatten:
         sf = f'{state}-flatten'
     else:
-        sf=state
-    modl = setup_nn(training_batches, save=True, save_file=sf,epochs=8)
+        sf = state
+    modl = setup_nn(training_batches, save=True, save_file=sf, epochs=8)
     output = modl(torch.from_numpy(X_test).float())
     return Y_test, output
+
+
 def train_test():
     for x in 'preflop flop turn river'.split():
         target, predict = train_model(x, batch_size=100)
@@ -143,6 +157,8 @@ def train_test():
         print(predict)
         diff = predict - target
         print(sum(diff))
+
+
 if __name__ == '__main__':
     # d = condense_data(10)
     # print(d[0].turn_array)
@@ -155,10 +171,10 @@ if __name__ == '__main__':
     # print(diff)
     # print(output)
     # train_model()
-            # print(x)
-        # print(outcome)
-        # print(x)
-        # print(x[4])
-        # print(pickle.load(f))
-        # for line in f:
-        #     print(pickle.loads(line))
+    # print(x)
+    # print(outcome)
+    # print(x)
+    # print(x[4])
+    # print(pickle.load(f))
+    # for line in f:
+    #     print(pickle.loads(line))
