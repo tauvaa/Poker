@@ -1,7 +1,22 @@
 """
 Functions and classes here are used for storing and checking hand data.
 """
+
+from enum import Enum, auto
+
 import numpy as np
+
+
+class HandOrder(Enum):
+    high_card = auto()
+    pair = auto()
+    two_pair = auto()
+    three_of_a_kind = auto()
+    straight = auto()
+    flush = auto()
+    full_house = auto()
+    four_of_a_kind = auto()
+    straight_flush = auto()
 
 
 class Hand:
@@ -29,6 +44,23 @@ class HandChecker:
     have multiple true values, ie. 3 of a kind is also a pair.  Need to find
     the best hand.
     """
+
+    def get_max_greater_index(self, array, min_value):
+        """
+        Use to get the indexex of an array where the value is greater than
+        min_value.  Used for getting pairs, trips, and quads.
+
+        Params:
+            array: numpy array you want to check
+            min_value: minimun value you want to be greater than
+        """
+        to_ret = -1
+        for i in range(len(array)):
+            if array[i] > min_value:
+                to_ret = i
+        if to_ret > -1:
+            return to_ret
+        return None
 
     def check_connected(self, array):
         """
@@ -73,68 +105,100 @@ class HandChecker:
         return np.matmul(hand_matrix, np.ones(13))
 
     def check_high_card(self, hand):
+        """
+        Use to get hand high card.
+
+        Params:
+            hand: Hand object
+        """
         return {
             "value": max([x.value for x in hand.cards]),
-            "hand_type": "high_card",
+            "hand_type": HandOrder.high_card.name,
         }
 
     def check_pair(self, hand):
         """
         Use to check hand for pair, when pairs exist will return dict with
         pair information.  When no pairs exist will return False.
+
+        Params:
+            hand: Hand object
         """
         value_array = self.get_value_array(hand.get_hand_matrix())
-
-        max_arg = np.argwhere(value_array > 1)
-        if len(max_arg) > 0:
-            max_arg = np.max(max_arg[0]) + 2  # Need to offset value
-            return {"value": max_arg, "hand_type": "pair"}
+        max_arg = self.get_max_greater_index(value_array, 1)
+        if max_arg is not None:
+            max_arg += 2
+            return {"value": max_arg, "hand_type": HandOrder.pair.name}
         return False
 
     def check_two_pair(self, hand):
         """
         Use to check a hand for 2 pair, when there is 2 pair will return two
         pair info.  When not will return False.
+
+        Params:
+            hand: Hand object
         """
 
         value_array = self.get_value_array(hand.get_hand_matrix())
-        pair_info = np.argwhere(value_array > 1)
-        if len(pair_info) > 1:
-            pairs = [x[0] + 2 for x in pair_info]  # add 2 for the offset
-            pairs.sort()
-            pairs = tuple(pairs)
-            return {"value": pairs, "hand_type": "two_pair"}
+        max_arg = self.get_max_greater_index(value_array, 1)
+        if max_arg is None:
+            return False
+        value_array[max_arg] -= 2
+        pairs = [max_arg + 2]
+        max_arg = self.get_max_greater_index(value_array, 1)
+        if max_arg is None:
+            return False
+        pairs.append(max_arg + 2)
+        pairs.sort(reverse=True)
+        pairs = tuple(pairs)
+        return {"value": pairs, "hand_type": HandOrder.two_pair.name}
         return False
 
     def check_three_of_a_kind(self, hand):
         """
         Use to check a hand for three of a kind, when there is three of a kind
         will return three of a kind info.  When not will return False.
+
+        Params:
+            hand: Hand object
         """
         value_array = self.get_value_array(hand.get_hand_matrix())
 
         max_arg = np.argwhere(value_array > 2)
         if len(max_arg) > 0:
             max_arg = np.max(max_arg[0]) + 2  # Need to offset value
-            return {"value": max_arg, "hand_type": "three_of_a_kind"}
+            return {
+                "value": max_arg,
+                "hand_type": HandOrder.three_of_a_kind.name,
+            }
         return False
 
     def check_straight(self, hand):
         """
         Use to check for straight, where there is a straight will return
         straight info. When not will return False.
+
+        Params:
+            hand: Hand object
         """
         value_array = self.get_value_array(hand.get_hand_matrix())
 
         high_value = self.check_connected(value_array)
         if high_value:
-            return {"hand_type": "straight", "value": high_value + 2}
+            return {
+                "hand_type": HandOrder.straight.name,
+                "value": high_value + 2,
+            }
         return False
 
     def check_flush(self, hand):
         """
         Use to check for flush, where there is a flush will return
         flush info. When not will return False.
+
+        Params:
+            hand: Hand object
         """
         hand_matrix = hand.get_hand_matrix()
         suit_array = self.get_suit_array(hand_matrix)
@@ -144,23 +208,59 @@ class HandChecker:
             high_card = np.argwhere(high_card > 0)
             high_card = max([x[0] for x in high_card]) + 2
 
-            return {"hand_type": "flush", "value": high_card}
+            return {"hand_type": HandOrder.flush.name, "value": high_card}
         return False
+
+    def check_full_house(self, hand):
+        """
+        Use to check for a full house. Will return full house information
+        (consiting of a value which is a tuple giving the 3 and 2 cards, in
+        that order.) and False if not found.
+
+        Params:
+            hand: Hand object representing the hand you are checking for a
+                full house.
+        """
+        value_array = self.get_value_array(hand.get_hand_matrix())
+        threes = self.get_max_greater_index(value_array, 2)
+        if threes is None:
+            return False
+        value_array[threes] -= 3
+        twos = self.get_max_greater_index(value_array, 1)
+        if twos is None:
+            return False
+        return {
+            "hand_type": HandOrder.full_house.name,
+            "value": (threes + 2, twos + 2),
+        }
 
     def check_four_of_a_kind(self, hand):
         """
         Use to check a hand for four of a kind, when there is four of a kind
         will return four of a kind info.  When not will return False.
+
+        Params:
+            hand: Hand object
         """
         value_array = self.get_value_array(hand.get_hand_matrix())
 
         max_arg = np.argwhere(value_array > 3)
         if len(max_arg) > 0:
             max_arg = np.max(max_arg[0]) + 2  # Need to offset value
-            return {"value": max_arg, "hand_type": "four_of_a_kind"}
+            return {
+                "value": max_arg,
+                "hand_type": HandOrder.four_of_a_kind.name,
+            }
         return False
 
     def check_straight_flush(self, hand):
+        """
+        Use to check for a straight flush, if found will return the highest
+        card in the straight flush. If not will return False.
+
+        Params:
+            hand: Hand object
+        """
         hand_matrix = hand.get_hand_matrix()
         flush_info = self.check_flush(hand)
         if not flush_info:
@@ -169,6 +269,73 @@ class HandChecker:
         suit_array = hand_matrix[suit_index, :]
         straight_info = self.check_connected(suit_array)
         if straight_info:
-            return {"hand_type": "straight_flush", "value": straight_info + 2}
+            return {
+                "hand_type": HandOrder.straight_flush.name,
+                "value": straight_info + 2,
+            }
 
         return False
+
+    def get_hand(self, hand):
+        """
+        Use to get the best hand in a given hand.
+
+        Params:
+            hand: Hand object
+
+        """
+        for func in [
+            self.check_straight_flush,
+            self.check_four_of_a_kind,
+            self.check_full_house,
+            self.check_flush,
+            self.check_straight,
+            self.check_three_of_a_kind,
+            self.check_two_pair,
+            self.check_pair,
+            self.check_high_card,
+        ]:
+            info = func(hand)
+            if info:
+                return info
+
+    def compare_hands(self, hand1, hand2):
+        hand1_info, hand2_info = self.get_hand(hand1), self.get_hand(hand2)
+        if (
+            HandOrder[hand1_info["hand_type"]].value
+            > HandOrder[hand2_info["hand_type"]].value
+        ):
+            return "hand1"
+        if (
+            HandOrder[hand2_info["hand_type"]].value
+            > HandOrder[hand1_info["hand_type"]].value
+        ):
+            return "hand2"
+        if hand1_info["hand_type"] == hand2_info["hand_type"]:
+
+            if hand1_info["hand_type"] not in (
+                HandOrder.two_pair.name,
+                HandOrder.full_house.name,
+            ):
+                if hand1_info["value"] > hand2_info["value"]:
+                    return "hand1"
+                if hand2_info["value"] > hand1_info["value"]:
+                    return "hand2"
+
+            else:
+                hand1_value = hand1_info["value"]
+                hand2_value = hand2_info["value"]
+
+                if hand1_value[0] > hand2_value[0]:
+                    return "hand1"
+
+                if hand2_value[0] > hand1_value[0]:
+                    return "hand2"
+
+                if hand1_value[1] > hand2_value[1]:
+                    return "hand1"
+
+                if hand2_value[1] > hand1_value[1]:
+                    return "hand2"
+
+        return "tie"
