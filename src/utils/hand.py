@@ -45,6 +45,22 @@ class HandChecker:
     the best hand.
     """
 
+    def get_kicker(self, array, num_cards):
+        """
+        Use to get kicker for array.
+
+        Params:
+            array: np array
+            num_cards: number of cards to return in kicker
+        """
+        kickers = np.argwhere(array > 0)
+
+        kickers = [x[0] for x in kickers]
+        kickers.sort(reverse=True)
+        kickers = kickers[0:num_cards]
+        kickers = [x + 2 for x in kickers]
+        return kickers
+
     def get_max_greater_index(self, array, min_value):
         """
         Use to get the indexex of an array where the value is greater than
@@ -111,9 +127,14 @@ class HandChecker:
         Params:
             hand: Hand object
         """
+        value = max([x.value for x in hand.cards])
+        kickers = [x.value for x in hand.cards if x.value != value]
+        kickers.sort(reverse=True)
+        kickers = kickers[0:4]
         return {
-            "value": max([x.value for x in hand.cards]),
+            "value": value,
             "hand_type": HandOrder.high_card.name,
+            "kickers": kickers,
         }
 
     def check_pair(self, hand):
@@ -126,9 +147,14 @@ class HandChecker:
         """
         value_array = self.get_value_array(hand.get_hand_matrix())
         max_arg = self.get_max_greater_index(value_array, 1)
+        value_array[max_arg] -= 2
         if max_arg is not None:
             max_arg += 2
-            return {"value": max_arg, "hand_type": HandOrder.pair.name}
+            return {
+                "value": max_arg,
+                "hand_type": HandOrder.pair.name,
+                "kickers": self.get_kicker(value_array, 3),
+            }
         return False
 
     def check_two_pair(self, hand):
@@ -153,7 +179,6 @@ class HandChecker:
         pairs.sort(reverse=True)
         pairs = tuple(pairs)
         return {"value": pairs, "hand_type": HandOrder.two_pair.name}
-        return False
 
     def check_three_of_a_kind(self, hand):
         """
@@ -165,12 +190,14 @@ class HandChecker:
         """
         value_array = self.get_value_array(hand.get_hand_matrix())
 
-        max_arg = np.argwhere(value_array > 2)
-        if len(max_arg) > 0:
-            max_arg = np.max(max_arg[0]) + 2  # Need to offset value
+        max_arg = self.get_max_greater_index(value_array, 2)
+        if max_arg is not None:
+            value_array[max_arg] -= 2
+            max_arg = max_arg + 2  # Need to offset value
             return {
                 "value": max_arg,
                 "hand_type": HandOrder.three_of_a_kind.name,
+                "kickers": self.get_kicker(value_array, 2)
             }
         return False
 
@@ -244,12 +271,14 @@ class HandChecker:
         """
         value_array = self.get_value_array(hand.get_hand_matrix())
 
-        max_arg = np.argwhere(value_array > 3)
-        if len(max_arg) > 0:
-            max_arg = np.max(max_arg[0]) + 2  # Need to offset value
+        max_arg = self.get_max_greater_index(value_array, 3)
+        if max_arg is not None:
+            value_array[max_arg] -= 4
+            max_arg = max_arg + 2  # Need to offset value
             return {
                 "value": max_arg,
                 "hand_type": HandOrder.four_of_a_kind.name,
+                "kickers": self.get_kicker(value_array, 1)
             }
         return False
 
@@ -298,6 +327,7 @@ class HandChecker:
             info = func(hand)
             if info:
                 return info
+        return {}
 
     def compare_hands(self, hand1, hand2):
         hand1_info, hand2_info = self.get_hand(hand1), self.get_hand(hand2)
@@ -336,6 +366,17 @@ class HandChecker:
                     return "hand1"
 
                 if hand2_value[1] > hand1_value[1]:
+                    return "hand2"
+
+        if "kickers" in hand1_info:
+            hand1_kickers = hand1_info["kickers"]
+            hand2_kickers = hand2_info["kickers"]
+            for inx, val in enumerate(hand1_kickers):
+                hand2_value = hand2_kickers[inx]
+
+                if val > hand2_value:
+                    return "hand1"
+                if hand2_value > val:
                     return "hand2"
 
         return "tie"

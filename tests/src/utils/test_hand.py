@@ -153,6 +153,19 @@ class TestHandChecker(unittest.TestCase):
             Card(10, Suit.heart.name),
         ]
 
+    def test_get_kicker(self):
+        card_array = np.zeros(13)
+        card_array = [0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1]
+        card_array = np.array(card_array)
+        kicker = self.hand_checker.get_kicker(card_array, 1)
+        self.assertListEqual(kicker, [14])
+
+        card_array = np.zeros(13)
+        card_array = [0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1]
+        card_array = np.array(card_array)
+        kicker = self.hand_checker.get_kicker(card_array, 2)
+        self.assertListEqual(kicker, [14, 10])
+
     def test_get_max_greater_index(self):
         array = np.zeros(13)
         array[9] = 1
@@ -225,12 +238,20 @@ class TestHandChecker(unittest.TestCase):
             [
                 Card(2, Suit.club.name),
                 Card(3, Suit.club.name),
+                Card(4, Suit.club.name),
+                Card(8, Suit.club.name),
+                Card(9, Suit.club.name),
                 Card(14, Suit.diamond.name),
             ]
         )
         high_card = self.hand_checker.check_high_card(hand)
         self.assertDictEqual(
-            high_card, {"hand_type": HandOrder.high_card.name, "value": 14}
+            high_card,
+            {
+                "hand_type": HandOrder.high_card.name,
+                "value": 14,
+                "kickers": [9, 8, 4, 3],
+            },
         )
 
     def test_check_pair(self):
@@ -239,7 +260,11 @@ class TestHandChecker(unittest.TestCase):
         pair_info = self.hand_checker.check_pair(hand)
         self.assertDictEqual(
             pair_info,
-            {"value": 2, "hand_type": HandOrder.pair.name},
+            {
+                "value": 2,
+                "hand_type": HandOrder.pair.name,
+                "kickers": [11, 10, 8],
+            },
             "error where pairs exist",
         )
 
@@ -298,7 +323,11 @@ class TestHandChecker(unittest.TestCase):
             )
         )
         hand = self.get_hand(self.three_of_a_kind_4)
-        expected = {"value": 4, "hand_type": HandOrder.three_of_a_kind.name}
+        expected = {
+            "value": 4,
+            "hand_type": HandOrder.three_of_a_kind.name,
+            "kickers": [10, 8],
+        }
         self.assertDictEqual(
             expected, self.hand_checker.check_three_of_a_kind(hand)
         )
@@ -353,7 +382,11 @@ class TestHandChecker(unittest.TestCase):
             )
         hand = self.get_hand(self.four_of_a_kind_3)
         hand_info = self.hand_checker.check_four_of_a_kind(hand)
-        expected = {"hand_type": HandOrder.four_of_a_kind.name, "value": 3}
+        expected = {
+            "hand_type": HandOrder.four_of_a_kind.name,
+            "value": 3,
+            "kickers": [10],
+        }
         self.assertDictEqual(expected, hand_info)
 
     def test_check_full_house(self):
@@ -405,12 +438,20 @@ class TestHandChecker(unittest.TestCase):
     def test_get_hand(self):
         hand = self.get_hand(self.high_card_queen)
         actual = self.hand_checker.get_hand(hand)
-        expected = {"hand_type": HandOrder.high_card.name, "value": 12}
+        expected = {
+            "hand_type": HandOrder.high_card.name,
+            "value": 12,
+            "kickers": [11, 10, 9, 7],
+        }
         self.assertDictEqual(actual, expected)
 
         hand = self.get_hand(self.pair_twos)
         actual = self.hand_checker.get_hand(hand)
-        expected = {"hand_type": HandOrder.pair.name, "value": 2}
+        expected = {
+            "hand_type": HandOrder.pair.name,
+            "value": 2,
+            "kickers": [11, 10, 8],
+        }
         self.assertDictEqual(actual, expected)
 
         hand = self.get_hand(self.two_pair_4_8)
@@ -420,7 +461,11 @@ class TestHandChecker(unittest.TestCase):
 
         hand = self.get_hand(self.three_of_a_kind_4)
         actual = self.hand_checker.get_hand(hand)
-        expected = {"hand_type": HandOrder.three_of_a_kind.name, "value": 4}
+        expected = {
+            "hand_type": HandOrder.three_of_a_kind.name,
+            "value": 4,
+            "kickers": [10, 8],
+        }
         self.assertDictEqual(actual, expected)
 
         hand = self.get_hand(self.straight_11_high)
@@ -440,7 +485,7 @@ class TestHandChecker(unittest.TestCase):
 
         hand = self.get_hand(self.four_of_a_kind_3)
         actual = self.hand_checker.get_hand(hand)
-        expected = {"hand_type": HandOrder.four_of_a_kind.name, "value": 3}
+        expected = {"hand_type": HandOrder.four_of_a_kind.name, "value": 3, "kickers": [10]}
         self.assertDictEqual(actual, expected)
 
         hand = self.get_hand(self.straight_flush_8_high)
@@ -479,6 +524,56 @@ class TestHandChecker(unittest.TestCase):
         hand2 = self.get_hand(self.straight_11_high)
         hand_winner = self.hand_checker.compare_hands(hand1, hand2)
         self.assertEqual(hand_winner, "hand2")
+
+    def test_compare_hand_kickers(self):
+        hand1 = [
+            Card(2, Suit.heart.name),
+            Card(3, Suit.diamond.name),
+            Card(7, Suit.club.name),
+            Card(9, Suit.spade.name),
+            Card(10, Suit.heart.name),
+            Card(11, Suit.heart.name),
+            Card(5, Suit.spade.name),
+        ]
+        hand1 = self.get_hand(hand1)
+
+        hand2 = [
+            Card(2, Suit.heart.name),
+            Card(3, Suit.diamond.name),
+            Card(7, Suit.club.name),
+            Card(9, Suit.spade.name),
+            Card(8, Suit.heart.name),
+            Card(11, Suit.heart.name),
+            Card(5, Suit.spade.name),
+        ]
+        hand2 = self.get_hand(hand2)
+        hand_winner = self.hand_checker.compare_hands(hand1, hand2)
+        self.assertEqual(hand_winner, "hand1")
+
+        # pairs
+        hand1 = [
+            Card(2, Suit.heart.name),
+            Card(3, Suit.diamond.name),
+            Card(7, Suit.club.name),
+            Card(9, Suit.spade.name),
+            Card(11, Suit.heart.name),
+            Card(11, Suit.heart.name),
+            Card(10, Suit.spade.name),
+        ]
+        hand1 = self.get_hand(hand1)
+
+        hand2 = [
+            Card(2, Suit.heart.name),
+            Card(3, Suit.diamond.name),
+            Card(7, Suit.club.name),
+            Card(9, Suit.spade.name),
+            Card(11, Suit.heart.name),
+            Card(11, Suit.heart.name),
+            Card(5, Suit.spade.name),
+        ]
+        hand2 = self.get_hand(hand2)
+        hand_winner = self.hand_checker.compare_hands(hand1, hand2)
+        self.assertEqual(hand_winner, "hand1")
 
 
 if __name__ == "__main__":
