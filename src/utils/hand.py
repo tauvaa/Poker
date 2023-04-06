@@ -26,7 +26,8 @@ class Hand:
 
     def __init__(self):
         self.cards = []
-
+    def reset(self):
+        self.cards = []
     def add_card(self, card):
         """Use to add card to hand."""
         self.cards.append(card)
