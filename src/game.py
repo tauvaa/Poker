@@ -49,8 +49,13 @@ class Game:
         num_checks = 0
         bet_amount = 0
         bet_options = [BetOption.check, BetOption.bet, BetOption.fold]
+        if self.game_state == GameState.preflop:
+            bet_amount = self.big_blind - self.small_blind
+            bet_options = [BetOption.call, BetOption.bet, BetOption.fold]
+            
         if self.dealer == self.player1:
             bettors = [self.player2, self.player1]
+            
         else:
             bettors = [self.player1, self.player2]
 

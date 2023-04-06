@@ -126,6 +126,7 @@ class TestGameBetting(unittest.TestCase):
             BettingDecision(BetOption.bet, 0),
             BettingDecision(BetOption.fold, 0),
         ]
+        self.game.game_state = GameState.flop
         betting_outcome = self.game.betting()
         self.assertEqual(self.game.player2.bank, self.start_bank - bet_amount)
         self.assertEqual(self.game.player1.bank, self.start_bank - bet_amount)
@@ -140,6 +141,7 @@ class TestGameBetting(unittest.TestCase):
             BettingDecision(BetOption.bet, bet_amount),
             BettingDecision(BetOption.call, 0),
         ]
+        self.game.game_state = GameState.flop
         betting_outcome = self.game.betting()
         self.assertEqual(self.game.player2.bank, self.start_bank - bet_amount)
         self.assertEqual(self.game.player1.bank, self.start_bank - bet_amount)
@@ -153,6 +155,7 @@ class TestGameBetting(unittest.TestCase):
             BettingDecision(BetOption.check, 0),
             BettingDecision(BetOption.check, 0),
         ]
+        self.game.game_state = GameState.flop
         betting_outcome = self.game.betting()
         self.assertEqual(self.game.player2.bank, self.start_bank)
         self.assertEqual(self.game.player1.bank, self.start_bank)
@@ -168,6 +171,7 @@ class TestGameBetting(unittest.TestCase):
             BettingDecision(BetOption.bet, bet_amount),
             BettingDecision(BetOption.call, 0),
         ]
+        self.game.game_state = GameState.flop
         betting_outcome = self.game.betting()
         self.assertEqual(self.game.player2.bank, self.start_bank - bet_amount)
         self.assertEqual(self.game.player1.bank, self.start_bank - bet_amount)
@@ -183,6 +187,7 @@ class TestGameBetting(unittest.TestCase):
             BettingDecision(BetOption.bet, bet_amount),
             BettingDecision(BetOption.call, 0),
         ]
+        self.game.game_state = GameState.flop
         betting_outcome = self.game.betting()
         self.assertEqual(
             self.game.player2.bank, self.start_bank - 2 * bet_amount
@@ -193,6 +198,27 @@ class TestGameBetting(unittest.TestCase):
         self.assertEqual(self.game.pot.amount, 4 * bet_amount)
         self.assertTrue(betting_outcome)
         self.assertEqual(mock_player_decision.call_count, 3)
+
+    @patch("src.player.Player.decision")
+    def test_betting_preflop(self, mock_player_decision):
+        bet_amount = 100
+        mock_player_decision.side_effect = [
+            BettingDecision(BetOption.bet, bet_amount),
+            BettingDecision(BetOption.fold, 0),
+        ]
+        betting_outcome = self.game.betting()
+        self.assertEqual(
+            self.game.player2.bank,
+            self.start_bank
+            - (self.game.big_blind - self.game.small_blind + bet_amount),
+        )
+        self.assertEqual(self.game.player1.bank, self.start_bank)
+        self.assertEqual(
+            self.game.pot.amount,
+            self.game.big_blind - self.game.small_blind + bet_amount,
+        )
+        self.assertFalse(betting_outcome)
+        self.assertEqual(mock_player_decision.call_count, 2)
 
 
 class TestPlayHand(unittest.TestCase):
@@ -249,6 +275,7 @@ class TestPlayHand(unittest.TestCase):
         Simulate a full game, player 1 to have 2 pair (jacks, 10s) player 2 to
         have pair 3s.
         """
+        print("running sim")
         bet_amount = 100
         preflop_decision = [
             BettingDecision(BetOption.bet, bet_amount),
@@ -307,13 +334,10 @@ class TestPlayHand(unittest.TestCase):
 
         self.game.deck.cards = cards
         self.game.play_hand()
-        self.assertTrue(
-            self.game.player1.bank, 2 * bet_amount + self.start_bank
-        )
-        self.assertTrue(
-            self.game.player2.bank, 2 * bet_amount - self.start_bank
-        )
         self.assertEqual(self.game.player1, self.game.winner)
+        self.assertEqual(
+            self.game.pot.amount, 4 * bet_amount + self.game.big_blind * 2
+        )
         mock_new_hand.assert_called_once()
 
 
