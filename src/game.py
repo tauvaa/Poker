@@ -66,6 +66,7 @@ class Game:
         num_checks = 0
         bet_amount = 0
         bet_options = [BetOption.check, BetOption.bet, BetOption.fold]
+        first_bet = False
 
         if self.dealer == self.player1:
             bettors = [self.player2, self.player1]
@@ -97,7 +98,12 @@ class Game:
             if decision.choice == BetOption.call:
                 bettor.update_bank(-bet_amount)
                 self.pot.add_pot(bet_amount)
-                return True
+                if self.game_phase != GamePhase.preflop or first_bet:
+
+                    return True
+                first_bet = True
+                bet_options = [BetOption.check, BetOption.bet]
+                num_checks += 1
 
             if decision.choice == BetOption.check:
                 if num_checks == 1:
@@ -174,7 +180,7 @@ class Game:
             winner=self.winner,
             loser=self.loser,
             dealer=self.dealer,
-            game_phase=self.game_phase
+            game_phase=self.game_phase,
         )
         return game_state
 
@@ -245,5 +251,3 @@ class Game:
         winner = self.winner
         self.new_hand()
         return winner
-
-

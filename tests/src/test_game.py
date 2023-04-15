@@ -231,6 +231,28 @@ class TestGameBetting(unittest.TestCase):
         self.assertFalse(betting_outcome)
         self.assertEqual(mock_player_decision.call_count, 2)
 
+    @patch("src.player.Player.decision")
+    def test_preflop_call(self, mock_player_decision):
+        decisions = [
+            BettingDecision(BetOption.bet, 100),
+            BettingDecision(BetOption.call, 0),
+            BettingDecision(BetOption.check, 0),
+        ]
+        mock_player_decision.side_effect = decisions
+        self.assertTrue(self.game.betting())
+        self.assertEqual(self.game.game_phase, GamePhase.preflop)
+
+    @patch("src.player.Player.decision")
+    def test_preflow_call_bet_call(self, mock_player_decision):
+        decisions = [
+            BettingDecision(BetOption.bet, 100),
+            BettingDecision(BetOption.call, 0),
+            BettingDecision(BetOption.bet, 0),
+            BettingDecision(BetOption.call, 0),
+        ]
+        mock_player_decision.side_effect = decisions
+        self.assertTrue(self.game.betting())
+
 
 class TestPlayHand(unittest.TestCase):
     def setUp(self):
@@ -281,7 +303,7 @@ class TestPlayHand(unittest.TestCase):
     @patch("src.game.Deck.shuffle")
     @patch("src.game.Game.new_hand")
     @patch("src.player.Player.decision")
-    def test_game_sim_1(self, mock_decision, mock_new_hand,mock_shuffle):
+    def test_game_sim_1(self, mock_decision, mock_new_hand, mock_shuffle):
         """
         Simulate a full game, player 1 to have 2 pair (jacks, 10s) player 2 to
         have pair 3s.
