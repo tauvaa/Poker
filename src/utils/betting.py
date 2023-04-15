@@ -11,13 +11,6 @@ class BetOption(Enum):
 
 
 @dataclass
-class BettingInfo:
-    pass
-
-
-@dataclass
 class BettingDecision:
     choice: BetOption
     bet_amount: Union[float, int]
-
-

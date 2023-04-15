@@ -42,7 +42,14 @@ class Deck:
             for i in range(2, 15)
             for suit in "heart spade diamond club".split()
         ]
-
+    def reset(self):
+        self.cards = [
+            Card(i, suit)
+            for i in range(2, 15)
+            for suit in "heart spade diamond club".split()
+        ]
+        
+        
     def shuffle(self):
         random.shuffle(self.cards)
 
