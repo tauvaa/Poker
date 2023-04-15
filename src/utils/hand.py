@@ -26,8 +26,10 @@ class Hand:
 
     def __init__(self):
         self.cards = []
+
     def reset(self):
         self.cards = []
+
     def add_card(self, card):
         """Use to add card to hand."""
         self.cards.append(card)
@@ -198,7 +200,7 @@ class HandChecker:
             return {
                 "value": max_arg,
                 "hand_type": HandOrder.three_of_a_kind.name,
-                "kickers": self.get_kicker(value_array, 2)
+                "kickers": self.get_kicker(value_array, 2),
             }
         return False
 
@@ -279,7 +281,7 @@ class HandChecker:
             return {
                 "value": max_arg,
                 "hand_type": HandOrder.four_of_a_kind.name,
-                "kickers": self.get_kicker(value_array, 1)
+                "kickers": self.get_kicker(value_array, 1),
             }
         return False
 
@@ -331,6 +333,14 @@ class HandChecker:
         return {}
 
     def compare_hands(self, hand1, hand2):
+        """
+        Use to compare hands.
+        If at any time a hand is better returns hand1/hand2
+        First check if hand1 is better than hand2 then if hand2 is better than
+        hand1 based on the hand_type.  If they are the same hand type use
+        the hand type info to determine which is better.  If that is the same
+        use the kicker info to determine if that is the same return a tie.
+        """
         hand1_info, hand2_info = self.get_hand(hand1), self.get_hand(hand2)
         if (
             HandOrder[hand1_info["hand_type"]].value

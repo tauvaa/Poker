@@ -6,7 +6,7 @@ from src.utils.deck import Card, Deck
 from src.utils.hand import HandChecker
 
 
-class GameState(Enum):
+class GamePhase(Enum):
     preflop = auto()
     flop = auto()
     turn = auto()
@@ -29,7 +29,7 @@ class Game:
         self.player1 = player1
         self.player2 = player2
         self.dealer = self.player1
-        self.game_state = GameState.preflop
+        self.game_phase = GamePhase.preflop
         self.deck = Deck()
         self.pot = Pot()
         self.community_cards = []
@@ -49,7 +49,7 @@ class Game:
         num_checks = 0
         bet_amount = 0
         bet_options = [BetOption.check, BetOption.bet, BetOption.fold]
-        if self.game_state == GameState.preflop:
+        if self.game_phase == GamePhase.preflop:
             bet_amount = self.big_blind - self.small_blind
             bet_options = [BetOption.call, BetOption.bet, BetOption.fold]
             
@@ -159,7 +159,7 @@ class Game:
         self.player1.hand.reset()
         self.player2.hand.reset()
         self.community_cards = []
-        self.game_state = GameState.preflop
+        self.game_phase = GamePhase.preflop
         self.winner = None
         self.loser = None
 
@@ -182,15 +182,15 @@ class Game:
         if not self.preflop():
             self.new_hand()
             return
-        self.game_state = GameState.flop
+        self.game_phase = GamePhase.flop
         if not self.flop():
             self.new_hand()
             return
-        self.game_state = GameState.turn
+        self.game_phase = GamePhase.turn
         if not self.turn():
             self.new_hand()
             return
-        self.game_state = GameState.river
+        self.game_phase = GamePhase.river
         if not self.river():
             self.new_hand()
             return

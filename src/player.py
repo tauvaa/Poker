@@ -1,3 +1,5 @@
+import abc
+
 from src.utils.hand import Hand
 
 
@@ -18,6 +20,7 @@ class Player:
 
     def decision(self, bet_amount, bet_options):
         """Use to make decision to check, call, bet, fold."""
+        # TODO turn this into an abstact method.
         pass
 
     def __eq__(self, obj):

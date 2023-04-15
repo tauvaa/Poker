@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from src.game import Game, GameState
+from src.game import Game, GamePhase
 from src.player import Player
 from src.utils.betting import BetOption, BettingDecision
 from src.utils.deck import Card, Suit
@@ -86,7 +86,7 @@ class TestGameStages(unittest.TestCase):
         self.assertListEqual(self.game.community_cards, [])
         self.assertListEqual(self.game.player1.hand.cards, [])
         self.assertListEqual(self.game.player2.hand.cards, [])
-        self.assertEqual(self.game.game_state, GameState.preflop)
+        self.assertEqual(self.game.game_phase, GamePhase.preflop)
 
     def test_new_hand_no_winner(self):
         win_amount = 100
@@ -108,7 +108,7 @@ class TestGameStages(unittest.TestCase):
         self.assertListEqual(self.game.community_cards, [])
         self.assertListEqual(self.game.player1.hand.cards, [])
         self.assertListEqual(self.game.player2.hand.cards, [])
-        self.assertEqual(self.game.game_state, GameState.preflop)
+        self.assertEqual(self.game.game_phase, GamePhase.preflop)
 
 
 class TestGameBetting(unittest.TestCase):
@@ -126,7 +126,7 @@ class TestGameBetting(unittest.TestCase):
             BettingDecision(BetOption.bet, 0),
             BettingDecision(BetOption.fold, 0),
         ]
-        self.game.game_state = GameState.flop
+        self.game.game_phase = GamePhase.flop
         betting_outcome = self.game.betting()
         self.assertEqual(self.game.player2.bank, self.start_bank - bet_amount)
         self.assertEqual(self.game.player1.bank, self.start_bank - bet_amount)
@@ -141,7 +141,7 @@ class TestGameBetting(unittest.TestCase):
             BettingDecision(BetOption.bet, bet_amount),
             BettingDecision(BetOption.call, 0),
         ]
-        self.game.game_state = GameState.flop
+        self.game.game_phase = GamePhase.flop
         betting_outcome = self.game.betting()
         self.assertEqual(self.game.player2.bank, self.start_bank - bet_amount)
         self.assertEqual(self.game.player1.bank, self.start_bank - bet_amount)
@@ -150,12 +150,11 @@ class TestGameBetting(unittest.TestCase):
 
     @patch("src.player.Player.decision")
     def test_betting_check_check(self, mock_player_decision):
-        bet_amount = 100
         mock_player_decision.side_effect = [
             BettingDecision(BetOption.check, 0),
             BettingDecision(BetOption.check, 0),
         ]
-        self.game.game_state = GameState.flop
+        self.game.game_phase = GamePhase.flop
         betting_outcome = self.game.betting()
         self.assertEqual(self.game.player2.bank, self.start_bank)
         self.assertEqual(self.game.player1.bank, self.start_bank)
@@ -171,7 +170,7 @@ class TestGameBetting(unittest.TestCase):
             BettingDecision(BetOption.bet, bet_amount),
             BettingDecision(BetOption.call, 0),
         ]
-        self.game.game_state = GameState.flop
+        self.game.game_phase = GamePhase.flop
         betting_outcome = self.game.betting()
         self.assertEqual(self.game.player2.bank, self.start_bank - bet_amount)
         self.assertEqual(self.game.player1.bank, self.start_bank - bet_amount)
@@ -187,7 +186,7 @@ class TestGameBetting(unittest.TestCase):
             BettingDecision(BetOption.bet, bet_amount),
             BettingDecision(BetOption.call, 0),
         ]
-        self.game.game_state = GameState.flop
+        self.game.game_phase = GamePhase.flop
         betting_outcome = self.game.betting()
         self.assertEqual(
             self.game.player2.bank, self.start_bank - 2 * bet_amount
@@ -240,7 +239,7 @@ class TestPlayHand(unittest.TestCase):
     def test_play_hand_flop(self, mock_betting, mock_new_hand):
         mock_betting.side_effect = [True, False]
         self.game.play_hand()
-        self.assertEqual(self.game.game_state, GameState.flop)
+        self.assertEqual(self.game.game_phase, GamePhase.flop)
         self.assertEqual(mock_new_hand.call_count, 1)
 
     @patch("src.game.Game.new_hand")
@@ -248,7 +247,7 @@ class TestPlayHand(unittest.TestCase):
     def test_play_hand_turn(self, mock_betting, mock_new_hand):
         mock_betting.side_effect = [True, True, False]
         self.game.play_hand()
-        self.assertEqual(self.game.game_state, GameState.turn)
+        self.assertEqual(self.game.game_phase, GamePhase.turn)
         self.assertEqual(mock_new_hand.call_count, 1)
 
     @patch("src.game.Game.new_hand")
@@ -256,7 +255,7 @@ class TestPlayHand(unittest.TestCase):
     def test_play_hand_river(self, mock_betting, mock_new_hand):
         mock_betting.side_effect = [True, True, True, False]
         self.game.play_hand()
-        self.assertEqual(self.game.game_state, GameState.river)
+        self.assertEqual(self.game.game_phase, GamePhase.river)
         self.assertEqual(mock_new_hand.call_count, 1)
 
     @patch("src.game.Game.new_hand")
@@ -264,7 +263,7 @@ class TestPlayHand(unittest.TestCase):
     def test_play_hand_full(self, mock_betting, mock_new_hand):
         mock_betting.side_effect = [True, True, True, True]
         self.game.play_hand()
-        self.assertEqual(self.game.game_state, GameState.river)
+        self.assertEqual(self.game.game_phase, GamePhase.river)
         self.assertEqual(mock_new_hand.call_count, 1)
 
     @patch("src.utils.deck.Deck.shuffle")
@@ -334,7 +333,9 @@ class TestPlayHand(unittest.TestCase):
 
         self.game.deck.cards = cards
         self.game.play_hand()
+        # Check that player 1 won.
         self.assertEqual(self.game.player1, self.game.winner)
+        # Check that the bet amounts are correct
         self.assertEqual(
             self.game.pot.amount, 4 * bet_amount + self.game.big_blind * 2
         )
