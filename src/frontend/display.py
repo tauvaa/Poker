@@ -9,3 +9,4 @@ class Display(abc.ABC):
     @abc.abstractmethod
     def show(self, game_state, *args, **kwargs):
         pass
+        

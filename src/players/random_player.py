@@ -24,4 +24,3 @@ class RandomPlayer(Player):
         if random_choice == BetOption.bet:
             print(f"{self.player_name} bets")
             return BettingDecision(BetOption.bet, 100)
-        print(random_choice)

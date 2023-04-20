@@ -29,10 +29,10 @@ class TestGameStages(unittest.TestCase):
             self.game.pot.amount, self.game.small_blind + self.game.big_blind
         )
         self.assertEqual(
-            self.game.player1.bank, self.start_bank - self.game.big_blind
+            self.game.player1.bank, self.start_bank - self.game.small_blind
         )
         self.assertEqual(
-            self.game.player2.bank, self.start_bank - self.game.small_blind
+            self.game.player2.bank, self.start_bank - self.game.big_blind
         )
         self.assertEqual(len(self.game.player2.hand.cards), 2)
         self.assertEqual(len(self.game.player1.hand.cards), 2)
@@ -243,7 +243,7 @@ class TestGameBetting(unittest.TestCase):
         self.assertEqual(self.game.game_phase, GamePhase.preflop)
 
     @patch("src.player.Player.decision")
-    def test_preflow_call_bet_call(self, mock_player_decision):
+    def test_preflop_bet_call_bet_call(self, mock_player_decision):
         decisions = [
             BettingDecision(BetOption.bet, 100),
             BettingDecision(BetOption.call, 0),
@@ -252,6 +252,39 @@ class TestGameBetting(unittest.TestCase):
         ]
         mock_player_decision.side_effect = decisions
         self.assertTrue(self.game.betting())
+        # self.assertEqual(self.game.player1.bank, self.game.player2.bank)
+
+    @patch("src.player.Player.decision")
+    def test_preflop_call_bet_call(self, mock_player_decision):
+
+        bet_amount = 100
+        # add big and small blinds
+        self.game.pot.amount += self.game.big_blind + self.game.small_blind
+        decisions = [
+            BettingDecision(BetOption.call, 0),
+            BettingDecision(BetOption.bet, bet_amount),
+            BettingDecision(BetOption.call, 0),
+        ]
+        mock_player_decision.side_effect = decisions
+        self.assertTrue(self.game.betting())
+        self.assertEqual(
+            self.game.pot.amount, 2 * self.game.big_blind + 2 * bet_amount
+        )
+
+    @patch("src.player.Player.decision")
+    def test_preflop_call_bet_call_decision(self, mock_player_decision):
+
+        bet_amount = 100
+        decisions = [
+            BettingDecision(BetOption.call, 0),
+            BettingDecision(BetOption.bet, bet_amount),
+            BettingDecision(BetOption.call, 0),
+        ]
+        mock_player_decision.side_effect = decisions
+        self.assertTrue(self.game.preflop())
+        self.assertEqual(
+            self.game.pot.amount, 2 * self.game.big_blind + 2 * bet_amount
+        )
 
 
 class TestPlayHand(unittest.TestCase):
@@ -373,6 +406,28 @@ class TestPlayHand(unittest.TestCase):
             self.game.pot.amount, 4 * bet_amount + self.game.big_blind * 2
         )
         mock_new_hand.assert_called_once()
+
+
+class TestGameOutcome(unittest.TestCase):
+    def setUp(self):
+        self.start_bank = 1000
+        self.player1 = Player("player 1", self.start_bank)
+        self.player2 = Player("player 2", self.start_bank)
+        self.game = Game(self.player1, self.player2)
+
+    @patch("src.player.Player.decision")
+    def test_fold_winner(self, mock_decision):
+        decisions = [
+            BettingDecision(BetOption.fold, 0),
+        ]
+        mock_decision.side_effect = decisions
+        self.game.preflop()
+        self.assertEqual(self.game.winner, self.game.player2)
+        self.game.new_hand()
+        self.assertEqual(
+            self.game.player2.bank,
+            self.start_bank + self.game.small_blind
+        )
 
 
 if __name__ == "__main__":

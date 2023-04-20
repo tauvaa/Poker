@@ -23,10 +23,11 @@ class GameState:
     player: Player
     opponent: Player
     community_cards: Union[List[Card], None]
-    winner: Union[Player, None]
+    winner: Union[Player, None]  # Don't consider winner on fold
     loser: Union[Player, None]
     dealer: Player
     game_phase: GamePhase
+    bet_options: Union[List[BetOption], None]
 
 
 class Pot:
@@ -82,7 +83,7 @@ class Game:
             bettor = bettors[bet_index % len(bettors)]
             bet_index += 1
             opponent = bettors[bet_index % len(bettors)]
-            game_state = self.get_game_state(bettor, opponent, bet_amount)
+            game_state = self.get_game_state(bettor, opponent, bet_amount, bet_options)
             decision = bettor.decision(
                 bet_amount, bet_options, game_info=game_state
             )
@@ -102,6 +103,7 @@ class Game:
 
                     return True
                 first_bet = True
+                bet_amount = 0
                 bet_options = [BetOption.check, BetOption.bet]
                 num_checks += 1
 
@@ -134,16 +136,23 @@ class Game:
         if self.dealer == self.player1:
 
             # blinds
+            self.player2.update_bank(-self.big_blind)
+            self.pot.add_pot(self.big_blind)
+
+            self.player1.update_bank(-self.small_blind)
+            self.pot.add_pot(self.small_blind)
+            # deal cards
+            for _ in range(2):
+                self.deal_card(self.player2)
+                self.deal_card(self.player1)
+        else:
+            # blinds
             self.player2.update_bank(-self.small_blind)
             self.pot.add_pot(self.small_blind)
 
             self.player1.update_bank(-self.big_blind)
             self.pot.add_pot(self.big_blind)
             # deal cards
-            for _ in range(2):
-                self.deal_card(self.player2)
-                self.deal_card(self.player1)
-        else:
             for _ in range(2):
                 self.deal_card(self.player1)
                 self.deal_card(self.player2)
@@ -170,7 +179,7 @@ class Game:
         self.deal_comunity_cards(1)
         return self.betting()
 
-    def get_game_state(self, player, opponent, bet_amount):
+    def get_game_state(self, player, opponent, bet_amount, bet_options):
         game_state = GameState(
             pot=self.pot.amount,
             bet_amount=bet_amount,
@@ -181,6 +190,7 @@ class Game:
             loser=self.loser,
             dealer=self.dealer,
             game_phase=self.game_phase,
+            bet_options=bet_options,
         )
         return game_state
 
@@ -202,7 +212,7 @@ class Game:
         for i, player in enumerate(players):
             if player.display:
                 opponent = players[(i + 1) % 2]
-                game_info = self.get_game_state(player, opponent, None)
+                game_info = self.get_game_state(player, opponent, None, None)
                 player.display.show(game_info)
         self.pot.reset()
         self.player1.hand.reset()
@@ -232,20 +242,24 @@ class Game:
         Use to play a single hand.
         """
         if not self.preflop():
+            winner = self.winner
             self.new_hand()
-            return
+            return winner
         self.game_phase = GamePhase.flop
         if not self.flop():
+            winner = self.winner
             self.new_hand()
-            return
+            return winner
         self.game_phase = GamePhase.turn
         if not self.turn():
+            winner = self.winner
             self.new_hand()
-            return
+            return winner
         self.game_phase = GamePhase.river
         if not self.river():
+            winner = self.winner
             self.new_hand()
-            return
+            return winner
         self.game_phase = GamePhase.check_cards
         self.check_hands()
         winner = self.winner
